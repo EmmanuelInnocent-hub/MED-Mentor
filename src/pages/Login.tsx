@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Activity, Mail, Lock, ArrowRight, Github, AlertCircle, Loader2 } from 'lucide-react';
+import { Activity, Mail, Lock, ArrowRight, Chrome, AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { 
   signInWithEmailAndPassword, 
@@ -45,7 +45,11 @@ export default function Login() {
       }
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      if (err.code === 'auth/operation-not-allowed') {
+        setError('Email/Password login is not enabled in Firebase. Please enable it in your Firebase Console under Authentication > Sign-in method.');
+      } else {
+        setError(err.message || 'Authentication failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -128,19 +132,34 @@ export default function Login() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-rose-50 border border-rose-100 p-4 rounded-2xl flex gap-3 text-rose-600 text-xs font-bold"
-              >
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {error}
-              </motion.div>
-            )}
+          <div className="space-y-6">
+            <button 
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              <Chrome className="w-5 h-5 text-white" />
+              {isLogin ? 'Enter with Google Identity' : 'Register with Google'}
+            </button>
 
-            {!isLogin && (
+            <div className="relative flex items-center justify-center">
+              <div className="border-t border-slate-100 w-full" />
+              <span className="bg-white px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 absolute">OR USE TERMINAL</span>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-rose-50 border border-rose-100 p-4 rounded-2xl flex gap-3 text-rose-600 text-[11px] font-bold"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {error}
+                </motion.div>
+              )}
+
+              {!isLogin && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5 text-left">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">First Name</label>
@@ -204,7 +223,7 @@ export default function Login() {
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -216,22 +235,7 @@ export default function Login() {
               )}
             </button>
           </form>
-
-          <div className="mt-8">
-            <div className="relative flex items-center justify-center mb-6">
-              <div className="border-t border-slate-100 w-full" />
-              <span className="bg-white px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 absolute">Synchronize</span>
-            </div>
-            
-            <button 
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold py-3.5 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-3 disabled:opacity-50"
-            >
-              <Github className="w-5 h-5 text-slate-900" />
-              Google identity
-            </button>
-          </div>
+        </div>
 
           <p className="mt-8 text-center text-xs text-slate-400 font-bold uppercase tracking-widest">
             {isLogin ? 'New to residency?' : 'Already registered?'} 

@@ -61,7 +61,7 @@ export default function History() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-0 space-y-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Clinical History</h1>
         <p className="text-slate-500 mt-1">Repository of your diagnostic paths and reasoning evaluations.</p>

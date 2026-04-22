@@ -95,7 +95,7 @@ export default function Results() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10 animate-in fade-in duration-700">
+    <div className="max-w-6xl mx-auto px-4 md:px-0 space-y-10 animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <button 

@@ -9,7 +9,9 @@ import {
   Loader2,
   Stethoscope,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Brain,
+  Activity
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
@@ -165,30 +167,40 @@ export default function CaseSession() {
 
       {/* Chat Area - Full Height */}
       <div className="flex-1 bg-white flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 custom-scrollbar">
-          {messages.filter(m => m.role !== 'system').map((m, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex gap-4 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}
-            >
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
-                m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-slate-100'
-              }`}>
-                {m.role === 'user' ? <UserIcon className="w-5 h-5" /> : <Brain className="w-5 h-5" />}
-              </div>
-              <div className={`max-w-[95%] rounded-[1.5rem] p-6 text-base leading-relaxed shadow-sm ${
-                m.role === 'user' 
-                  ? 'bg-blue-600 text-white rounded-tr-none font-medium' 
-                  : 'bg-slate-50 text-slate-800 rounded-tl-none border border-slate-100'
-              }`}>
-                <div className="markdown-body prose prose-sm prose-slate max-w-none">
-                  <ReactMarkdown>{m.content}</ReactMarkdown>
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 custom-scrollbar pb-32">
+          {messages.filter(m => m.role !== 'system').map((m, idx) => {
+            const isInitialMsg = idx === 0 && m.role === 'assistant';
+            
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex gap-4 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}
+              >
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
+                  m.role === 'user' ? 'bg-blue-600 text-white' : (isInitialMsg ? 'bg-slate-900 text-blue-400' : 'bg-white text-slate-600 border border-slate-100')
+                }`}>
+                  {m.role === 'user' ? <UserIcon className="w-5 h-5" /> : (isInitialMsg ? <Activity className="w-5 h-5" /> : <Brain className="w-5 h-5" />)}
                 </div>
-              </div>
-            </motion.div>
-          ))}
+                <div className={`max-w-[95%] rounded-[1.5rem] p-6 text-base leading-relaxed shadow-sm ${
+                  m.role === 'user' 
+                    ? 'bg-blue-600 text-white rounded-tr-none font-medium' 
+                    : (isInitialMsg ? 'bg-slate-900 text-slate-100 rounded-tl-none border border-slate-800' : 'bg-slate-50 text-slate-800 rounded-tl-none border border-slate-100')
+                }`}>
+                  {isInitialMsg && (
+                    <div className="flex items-center gap-2 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-blue-500">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                      Incoming Clinical Report
+                    </div>
+                  )}
+                  <div className={`markdown-body prose prose-sm ${isInitialMsg ? 'prose-invert text-slate-300' : 'prose-slate'} max-w-none`}>
+                    <ReactMarkdown>{m.content}</ReactMarkdown>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
           {isLoading && (
             <div className="flex gap-4">
               <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center border border-slate-100 shrink-0">

@@ -151,31 +151,33 @@ export default function Sidebar() {
       </motion.aside>
 
       {/* Mobile Navigation Bar */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 z-[100]">
-        <nav className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl shadow-blue-900/20">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-1.5 transition-all px-4 py-2 rounded-2xl ${
-                  isActive 
-                    ? 'text-blue-400 bg-blue-500/10' 
-                    : 'text-slate-500 hover:text-slate-300'
-                }`
-              }
-            >
-              <item.icon className="w-6 h-6" />
-              {location.pathname === item.path && (
-                <motion.div layoutId="mobile-nav-pill" className="w-1 h-1 bg-blue-400 rounded-full shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
-              )}
-            </NavLink>
-          ))}
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-black text-[10px] shadow-lg border-2 border-white/10">
-            {profile?.firstName?.slice(0, 2).toUpperCase() || 'Dr'}
-          </div>
-        </nav>
-      </div>
+      {!location.pathname.startsWith('/case/') && (
+        <div className="md:hidden fixed bottom-6 left-6 right-6 z-[100]">
+          <nav className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl shadow-blue-900/20">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex flex-col items-center gap-1.5 transition-all px-4 py-2 rounded-2xl ${
+                    isActive 
+                      ? 'text-blue-400 bg-blue-500/10' 
+                      : 'text-slate-500 hover:text-slate-300'
+                  }`
+                }
+              >
+                <item.icon className="w-6 h-6" />
+                {location.pathname === item.path && (
+                  <motion.div layoutId="mobile-nav-pill" className="w-1 h-1 bg-blue-400 rounded-full shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
+                )}
+              </NavLink>
+            ))}
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-black text-[10px] shadow-lg border-2 border-white/10">
+              {profile?.firstName?.slice(0, 2).toUpperCase() || 'Dr'}
+            </div>
+          </nav>
+        </div>
+      )}
     </>
   );
 }

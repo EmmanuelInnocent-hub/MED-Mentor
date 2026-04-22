@@ -41,7 +41,7 @@ function AppContent() {
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
       
-      <Route path="/" element={
+      <Route path="/*" element={
         <ProtectedRoute>
           <div className="flex h-screen w-full bg-[#f8fafc] font-sans text-slate-900 overflow-hidden flex-col md:flex-row">
             <Sidebar />

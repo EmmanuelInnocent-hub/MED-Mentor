@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny Everything
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Safety Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+
+    // 1. User Profiles
+    // Match against the userId placeholder
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.uid == userId
+          && data.firstName is string && data.firstName.size() <= 100
+          && data.rank in ['Student', 'Resident', 'Attending']
+          && data.email is string && data.email.size() <= 255
+          && data.createdAt == request.time
+          && (data.get('knowledgeProgress', 0) is number);
+      }
+
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) 
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['firstName', 'rank', 'knowledgeProgress'])
+                    && incoming().firstName is string && incoming().firstName.size() <= 100
+                    && incoming().rank in ['Student', 'Resident', 'Attending']
+                    && incoming().knowledgeProgress is number;
+    }
+
+    // 2. Simulation Sessions
+    match /sessions/{sessionId} {
+      function isValidSession(data) {
+        return isValidId(sessionId)
+          && data.userId == request.auth.uid
+          && data.caseTitle is string && data.caseTitle.size() <= 200
+          && data.completedAt == request.time
+          && data.score.overall is number && data.score.overall >= 0 && data.score.overall <= 100;
+      }
+
+      // Secure list query enforcement
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      // Creating a new result - relational sync: user must exist
+      allow create: if isSignedIn() 
+                    && isValidSession(incoming())
+                    && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+      
+      // Sessions are immutable: No updates or deletes allowed by client
+      allow update, delete: if false;
+    }
+  }
+}

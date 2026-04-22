@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Send, 
-  User, 
+  User as UserIcon, 
   Info, 
   ChevronDown, 
   ChevronUp, 
@@ -13,6 +13,9 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
+import { doc, setDoc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
+import { db, handleFirestoreError } from '../lib/firebase';
+import { useAuth } from '../context/AuthContext';
 import { cases } from '../lib/casePrompts';
 import { buildSystemPrompt, getChatResponse, scoreSession } from '../lib/gemini';
 import { Message, Case, SessionResult } from '../types';
@@ -22,6 +25,7 @@ export default function CaseSession() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const difficulty = location.state?.difficulty || 'Resident';
   
   const [activeCase, setActiveCase] = useState<Case | null>(null);
@@ -43,13 +47,13 @@ export default function CaseSession() {
 
     // Initial AI greeting
     const systemPrompt = buildSystemPrompt(found, difficulty);
-    const initialGreeting = "Hello. I am MedMentor. I have a new patient for us to evaluate. Please review the brief above and tell me your initial approach or any questions you'd like to ask the patient first.";
+    const initialGreeting = `Hello Dr. ${profile?.firstName || ''}. I am MedMentor. I have a new patient for us to evaluate. Please review the brief above and tell me your initial approach or any questions you'd like to ask the patient first.`;
     
     setMessages([
       { role: 'system', content: systemPrompt },
       { role: 'assistant', content: initialGreeting }
     ]);
-  }, [id, difficulty]);
+  }, [id, difficulty, profile]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -76,30 +80,36 @@ export default function CaseSession() {
   };
 
   const handleEndSession = async () => {
-    if (!activeCase || isEnding) return;
+    if (!activeCase || isEnding || !user) return;
     setIsEnding(true);
     
     try {
       const resultData = await scoreSession(messages, activeCase);
       const sessionId = uuidv4();
       
-      const fullResult: SessionResult = {
-        id: sessionId,
+      const fullResult = {
+        userId: user.uid,
         caseId: activeCase.id,
         caseTitle: activeCase.title,
         specialty: activeCase.specialty,
-        messages,
+        difficulty,
+        messages: messages.map(m => ({ role: m.role, content: m.content })),
         score: resultData,
-        completedAt: new Date().toISOString()
+        completedAt: serverTimestamp()
       };
 
-      const existing = JSON.parse(localStorage.getItem('medmentor_sessions') || '[]');
-      localStorage.setItem('medmentor_sessions', JSON.stringify([fullResult, ...existing]));
+      // Save to Firestore
+      await setDoc(doc(db, 'sessions', sessionId), fullResult);
+
+      // Update user progress (simple increment for demo)
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        knowledgeProgress: increment(5)
+      });
       
       navigate(`/results/${sessionId}`);
-    } catch (error) {
-      console.error(error);
-      alert("Error scoring session. Please try again.");
+    } catch (error: any) {
+      handleFirestoreError(error, 'create', `sessions/${id}`);
     } finally {
       setIsEnding(false);
     }
@@ -163,7 +173,7 @@ export default function CaseSession() {
               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
                 m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-slate-100'
               }`}>
-                {m.role === 'user' ? <User className="w-5 h-5" /> : <Brain className="w-5 h-5" />}
+                {m.role === 'user' ? <UserIcon className="w-5 h-5" /> : <Brain className="w-5 h-5" />}
               </div>
               <div className={`max-w-[75%] rounded-[1.5rem] p-5 text-[13px] leading-relaxed shadow-sm ${
                 m.role === 'user' 

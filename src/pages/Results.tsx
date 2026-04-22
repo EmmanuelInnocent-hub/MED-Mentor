@@ -8,7 +8,8 @@ import {
   ChevronLeft,
   Share2,
   FileText,
-  Star
+  Star,
+  Loader2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { 
@@ -20,23 +21,58 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import ReactMarkdown from 'react-markdown';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from '../context/AuthContext';
 import ProgressRing from '../components/ProgressRing';
 import { SessionResult } from '../types';
 
 export default function Results() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [result, setResult] = useState<SessionResult | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('medmentor_sessions') || '[]');
-    const found = saved.find((s: SessionResult) => s.id === id);
-    if (!found) {
-      navigate('/');
-      return;
+    async function fetchResult() {
+      if (!id || !user) return;
+      try {
+        const docRef = doc(db, 'sessions', id);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.userId !== user.uid) {
+            navigate('/');
+            return;
+          }
+          setResult({
+            id: docSnap.id,
+            ...data,
+            completedAt: data.completedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+          } as SessionResult);
+        } else {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error("Error fetching result:", error);
+        navigate('/');
+      } finally {
+        setLoading(false);
+      }
     }
-    setResult(found);
-  }, [id]);
+    fetchResult();
+  }, [id, user]);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+        <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-xs">Assembling Evaluative Data</p>
+      </div>
+    );
+  }
 
   if (!result) return null;
 

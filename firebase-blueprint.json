@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stored user profile information within Firestore.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique identifier for the user." },
+        "firstName": { "type": "string", "description": "User's first name." },
+        "rank": { "type": "string", "enum": ["Student", "Resident", "Attending"], "description": "Medical professional rank." },
+        "email": { "type": "string", "format": "email", "description": "User's email address." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the user was created." },
+        "knowledgeProgress": { "type": "number", "description": "Overall progression percentage (0-100)." }
+      },
+      "required": ["uid", "firstName", "rank", "email", "createdAt"]
+    },
+    "SessionResult": {
+      "title": "Simulation Result",
+      "description": "Evaluated results from a clinical simulation session.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "caseTitle": { "type": "string" },
+        "specialty": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "score": {
+          "type": "object",
+          "properties": {
+            "overall": { "type": "number" },
+            "grade": { "type": "string" },
+            "dimensions": {
+              "type": "object",
+              "properties": {
+                "diagnosticAccuracy": { "type": "number" },
+                "reasoningProcess": { "type": "number" },
+                "keyStepCoverage": { "type": "number" },
+                "safetyAwareness": { "type": "number" }
+              }
+            },
+            "feedback": { "type": "string" },
+            "strengths": { "type": "array", "items": { "type": "string" } },
+            "gaps": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "transcript": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["id", "userId", "caseTitle", "specialty", "difficulty", "completedAt", "score"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles managed by userId."
+    },
+    "/sessions/{sessionId}": {
+      "schema": "SessionResult",
+      "description": "Individual simulation results stored by unique session ID."
+    }
+  }
+}

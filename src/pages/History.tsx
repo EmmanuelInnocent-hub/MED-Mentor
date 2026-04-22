@@ -7,21 +7,50 @@ import {
   Calendar,
   Layers,
   ChevronDown,
-  Inbox
+  Inbox,
+  Loader2
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from '../context/AuthContext';
 import { SessionResult } from '../types';
 
 export default function History() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sessions, setSessions] = useState<SessionResult[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('medmentor_sessions') || '[]');
-    setSessions(saved);
-  }, []);
+    async function fetchSessions() {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const sessionsRef = collection(db, 'sessions');
+        const q = query(
+          sessionsRef, 
+          where('userId', '==', user.uid),
+          orderBy('completedAt', 'desc')
+        );
+        const querySnapshot = await getDocs(q);
+        const fetched = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          // Handle Firestore timestamp
+          completedAt: doc.data().completedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+        })) as SessionResult[];
+        setSessions(fetched);
+      } catch (error) {
+        console.error("Error fetching history:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSessions();
+  }, [user]);
 
   const specialties = ['All', ...Array.from(new Set(sessions.map(s => s.specialty)))];
 
@@ -65,7 +94,61 @@ export default function History() {
       </div>
 
       <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-x-auto custom-scrollbar">
+        {loading ? (
+          <div className="px-6 py-20 text-center flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+            <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Accessing Medical Archives...</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile View: Cards */}
+            <div className="block md:hidden divide-y divide-slate-100">
+          {filtered.length === 0 ? (
+            <div className="px-6 py-20 text-center">
+              <div className="bg-slate-100/50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <Inbox className="w-10 h-10 text-slate-300" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Repository Empty</h3>
+              <p className="text-slate-500 text-sm mt-1">Configure your next simulation to begin tracking.</p>
+            </div>
+          ) : (
+            filtered.map((s) => (
+              <div 
+                key={s.id} 
+                onClick={() => navigate(`/results/${s.id}`)}
+                className="p-6 active:bg-slate-50 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900 leading-tight">{s.caseTitle}</div>
+                      <div className="text-[10px] text-slate-400 uppercase tracking-wide mt-1">{s.specialty} • {new Date(s.completedAt).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  <div className={`px-2 py-1 rounded-lg text-[10px] font-black border ${
+                    s.score.overall >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                    s.score.overall >= 60 ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                    'bg-rose-50 text-rose-700 border-rose-100'
+                  }`}>
+                    {s.score.overall}%
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Grade: {s.score.grade}</span>
+                  <div className="text-blue-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                    Review Case <ChevronRight className="w-3 h-3" />
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto custom-scrollbar">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
@@ -140,7 +223,9 @@ export default function History() {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </>
+    )}
+  </div>
+</div>
   );
 }

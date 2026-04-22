@@ -11,11 +11,16 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from '../context/AuthContext';
 import { SessionResult } from '../types';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [sessions, setSessions] = useState<SessionResult[]>([]);
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     completed: 0,
     avgScore: 0,
@@ -24,37 +29,62 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('medmentor_sessions') || '[]');
-    setSessions(saved);
-
-    if (saved.length > 0) {
-      const avg = Math.round(saved.reduce((acc: number, s: SessionResult) => acc + s.score.overall, 0) / saved.length);
+    async function fetchDashboardData() {
+      if (!user) return;
       
-      const specialtyScores: Record<string, { total: number, count: number }> = {};
-      saved.forEach((s: SessionResult) => {
-        if (!specialtyScores[s.specialty]) specialtyScores[s.specialty] = { total: 0, count: 0 };
-        specialtyScores[s.specialty].total += s.score.overall;
-        specialtyScores[s.specialty].count += 1;
-      });
+      try {
+        const sessionsRef = collection(db, 'sessions');
+        const q = query(
+          sessionsRef, 
+          where('userId', '==', user.uid),
+          orderBy('completedAt', 'desc'),
+          limit(10)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const fetchedSessions = querySnapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data() 
+        })) as SessionResult[];
+        
+        setSessions(fetchedSessions);
 
-      let worstSpecialty = 'None';
-      let minAvg = 101;
-      Object.entries(specialtyScores).forEach(([key, val]) => {
-        const avg = val.total / val.count;
-        if (avg < minAvg) {
-          minAvg = avg;
-          worstSpecialty = key;
+        if (fetchedSessions.length > 0) {
+          const avg = Math.round(fetchedSessions.reduce((acc: number, s: SessionResult) => acc + s.score.overall, 0) / fetchedSessions.length);
+          
+          const specialtyScores: Record<string, { total: number, count: number }> = {};
+          fetchedSessions.forEach((s: SessionResult) => {
+            if (!specialtyScores[s.specialty]) specialtyScores[s.specialty] = { total: 0, count: 0 };
+            specialtyScores[s.specialty].total += s.score.overall;
+            specialtyScores[s.specialty].count += 1;
+          });
+
+          let worstSpecialty = 'None';
+          let minAvg = 101;
+          Object.entries(specialtyScores).forEach(([key, val]) => {
+            const avg = val.total / val.count;
+            if (avg < minAvg) {
+              minAvg = avg;
+              worstSpecialty = key;
+            }
+          });
+
+          setStats({
+            completed: fetchedSessions.length,
+            avgScore: avg,
+            weakArea: worstSpecialty,
+            streak: 5 // Defaulting to 5 for now
+          });
         }
-      });
-
-      setStats({
-        completed: saved.length,
-        avgScore: avg,
-        weakArea: worstSpecialty,
-        streak: 5
-      });
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, []);
+
+    fetchDashboardData();
+  }, [user]);
 
   const StatCard = ({ label, value, subtext, delay, valueColor = 'text-slate-900' }: any) => (
     <motion.div
@@ -65,7 +95,7 @@ export default function Dashboard() {
     >
       <div>
         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{label}</div>
-        <div className={`text-3xl font-bold ${valueColor}`}>{value}</div>
+        <div className={`text-3xl font-bold ${valueColor}`}>{value.length > 15 ? value.slice(0, 12) + '...' : value}</div>
       </div>
       <div className="mt-2 text-[10px] font-medium text-slate-500 uppercase tracking-wide">
         {subtext}
@@ -74,15 +104,19 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="space-y-6">
-      <header className="flex justify-between items-center shrink-0">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Welcome back, Dr. Emmanuel</h1>
-          <p className="text-slate-500">You have {sessions.length} active sessions in your rotation. Review your performance.</p>
+    <div className="space-y-6 pb-20 md:pb-0">
+      <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 shrink-0">
+        <div className="space-y-1 text-center md:text-left">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+            Welcome back, Dr. {profile?.firstName || 'Emmanuel'}
+          </h1>
+          <p className="text-slate-500 text-sm">
+            You have {stats.completed} active sessions in your rotation. Review your performance.
+          </p>
         </div>
         <button
           onClick={() => navigate('/case/setup')}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all active:scale-95"
+          className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all active:scale-95 text-sm"
         >
           <Plus className="w-5 h-5" />
           Start New Clinical Case
@@ -119,13 +153,13 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
         <section className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-            <h2 className="font-bold text-lg">Recent Case Sessions</h2>
-            <button onClick={() => navigate('/history')} className="text-sm text-blue-600 font-medium hover:underline">View All Sessions</button>
+          <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+            <h2 className="font-bold text-base md:text-lg">Recent Case Sessions</h2>
+            <button onClick={() => navigate('/history')} className="text-xs md:text-sm text-blue-600 font-bold hover:underline uppercase tracking-widest">View All</button>
           </div>
 
-          <div className="flex-1 overflow-auto p-4 custom-scrollbar">
-            <table className="w-full border-collapse">
+          <div className="flex-1 overflow-x-auto p-0 md:p-4 custom-scrollbar">
+            <table className="w-full min-w-[600px] md:min-w-0 border-collapse">
               <thead className="sticky top-0 bg-white">
                 <tr className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
                   <th className="p-4">Case Title</th>

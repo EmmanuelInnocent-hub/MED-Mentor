@@ -1,0 +1,6 @@
+{
+  "name": "MedMentor AI",
+  "description": "A Socratic clinical reasoning tutor for medical students powered by Gemini AI. Practice cases, get real-time feedback, and track your diagnostic accuracy.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

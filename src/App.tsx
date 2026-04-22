@@ -46,8 +46,8 @@ function AppContent() {
           <div className="flex h-screen w-full bg-[#f8fafc] font-sans text-slate-900 overflow-hidden flex-col md:flex-row">
             <Sidebar />
             <main className="flex-1 flex flex-col min-w-0 overflow-hidden pb-24 md:pb-0">
-              <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar">
-                <div className="max-w-6xl mx-auto">
+              <div className="flex-1 overflow-y-auto p-0 md:p-6 custom-scrollbar">
+                <div className="w-full h-full">
                   <Routes>
                     <Route index element={<Dashboard />} />
                     <Route path="case/setup" element={<CaseSetup />} />

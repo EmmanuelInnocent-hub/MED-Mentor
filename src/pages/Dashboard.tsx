@@ -104,7 +104,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="space-y-6 pb-20 md:pb-0">
+    <div className="max-w-7xl mx-auto px-4 md:px-0 space-y-6 pb-20 md:pb-0">
       <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 shrink-0">
         <div className="space-y-1 text-center md:text-left">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">

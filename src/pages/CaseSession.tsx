@@ -265,31 +265,3 @@ export default function CaseSession() {
   );
 }
 
-function Brain(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M9.5 2a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h2Z" />
-      <path d="M16.5 2a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h2Z" />
-      <path d="M12 18V6" />
-      <path d="M12 22v-4" />
-      <path d="M12 13h4" />
-      <path d="M12 18h6" />
-      <path d="M12 8H8" />
-      <path d="M16 8V6a2 2 0 0 0-2-2" />
-      <path d="M8 8V6a2 2 0 0 1 2-2" />
-      <path d="M8 18v2a2 2 0 0 0 2 2" />
-      <path d="M16 18v2a2 2 0 0 1-2 2" />
-    </svg>
-  );
-}

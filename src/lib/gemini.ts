@@ -28,7 +28,6 @@ TONE: Calm, encouraging, professional, and Socratic. Like a brilliant attending 
 }
 
 export async function getChatResponse(messages: Message[]) {
-  const systemMessage = messages.find(m => m.role === 'system');
   const chatContents = messages
     .filter(m => m.role !== 'system')
     .map(m => ({
@@ -36,9 +35,21 @@ export async function getChatResponse(messages: Message[]) {
       parts: [{ text: m.content }]
     }));
 
+  // Gemini API requires the conversation to start with a 'user' message.
+  // If the assistant starts the conversation (which we do with our initial greeting),
+  // we shift the history or handle it so the API doesn't reject it.
+  const refinedContents = chatContents[0]?.role === 'model' 
+    ? chatContents.slice(1) 
+    : chatContents;
+
+  // If there are no user messages yet, we shouldn't send an empty request
+  if (refinedContents.length === 0) {
+    return "I'm ready to begin the simulation. What are your first steps?";
+  }
+
   const response = await ai.models.generateContent({
     model: MODEL_NAME,
-    contents: chatContents as any,
+    contents: refinedContents as any,
     config: {
       systemInstruction: systemPromptContent(messages),
       temperature: 0.7,

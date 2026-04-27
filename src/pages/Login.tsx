@@ -8,7 +8,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider
 } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 
 export default function Login() {
@@ -47,6 +47,8 @@ export default function Login() {
     } catch (err: any) {
       if (err.code === 'auth/operation-not-allowed') {
         setError('Email/Password login is not enabled in Firebase. Please enable it in your Firebase Console under Authentication > Sign-in method.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Network request failed. This is usually caused by an ad-blocker or because your current URL is not in the Firebase "Authorized Domains" list. Please check your internet and Firebase Console settings.');
       } else {
         setError(err.message || 'Authentication failed');
       }
@@ -63,15 +65,20 @@ export default function Login() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Check if profile exists, if not create one with defaults
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        firstName: user.displayName?.split(' ')[0] || 'Doctor',
-        rank: 'Resident',
-        email: user.email,
-        createdAt: serverTimestamp(),
-        knowledgeProgress: 0
-      }, { merge: true });
+      // Check if profile exists first
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (!userDoc.exists()) {
+        // Create new profile with defaults
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          firstName: user.displayName?.split(' ')[0] || 'Doctor',
+          rank: 'Resident',
+          email: user.email,
+          createdAt: serverTimestamp(),
+          knowledgeProgress: 0
+        });
+      }
       
       navigate('/');
     } catch (err: any) {

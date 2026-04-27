@@ -15,6 +15,7 @@ import { collection, query, where, getDocs, orderBy, limit } from 'firebase/fire
 import { db } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 import { SessionResult } from '../types';
+import RoadmapSection from '../components/RoadmapSection';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -34,14 +35,27 @@ export default function Dashboard() {
       
       try {
         const sessionsRef = collection(db, 'sessions');
-        const q = query(
+        let q = query(
           sessionsRef, 
           where('userId', '==', user.uid),
           orderBy('completedAt', 'desc'),
           limit(10)
         );
         
-        const querySnapshot = await getDocs(q);
+        let querySnapshot;
+        try {
+          querySnapshot = await getDocs(q);
+        } catch (idxError: any) {
+          // Fallback if index isn't ready: remove orderBy
+          console.warn("Firestore index not ready, using fallback query", idxError);
+          q = query(
+            sessionsRef, 
+            where('userId', '==', user.uid),
+            limit(10)
+          );
+          querySnapshot = await getDocs(q);
+        }
+        
         const fetchedSessions = querySnapshot.docs.map(doc => ({ 
           id: doc.id, 
           ...doc.data() 
@@ -104,7 +118,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-0 space-y-6 pb-20 md:pb-0">
+    <div className="space-y-6">
       <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 shrink-0">
         <div className="space-y-1 text-center md:text-left">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
@@ -235,6 +249,8 @@ export default function Dashboard() {
           </button>
         </section>
       </div>
+
+      <RoadmapSection />
     </div>
   );
 }

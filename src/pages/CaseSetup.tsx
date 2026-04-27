@@ -30,7 +30,7 @@ export default function CaseSetup() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-0 space-y-6">
+    <div className="max-w-5xl space-y-6">
       <header className="shrink-0 mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Configure Simulation</h1>
         <p className="text-slate-500 mt-1">Select your specialty and challenge level to begin the Socratic session.</p>

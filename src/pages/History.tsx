@@ -30,12 +30,24 @@ export default function History() {
       setLoading(true);
       try {
         const sessionsRef = collection(db, 'sessions');
-        const q = query(
+        let q = query(
           sessionsRef, 
           where('userId', '==', user.uid),
           orderBy('completedAt', 'desc')
         );
-        const querySnapshot = await getDocs(q);
+        
+        let querySnapshot;
+        try {
+          querySnapshot = await getDocs(q);
+        } catch (idxError: any) {
+          console.warn("Firestore index not ready, using fallback for History", idxError);
+          q = query(
+            sessionsRef, 
+            where('userId', '==', user.uid)
+          );
+          querySnapshot = await getDocs(q);
+        }
+        
         const fetched = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -61,7 +73,7 @@ export default function History() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-0 space-y-6">
+    <div className="space-y-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Clinical History</h1>
         <p className="text-slate-500 mt-1">Repository of your diagnostic paths and reasoning evaluations.</p>

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import CaseSetup from './pages/CaseSetup';
@@ -12,6 +12,7 @@ import CaseSession from './pages/CaseSession';
 import Results from './pages/Results';
 import History from './pages/History';
 import Profile from './pages/Profile';
+import RadiologyAI from './pages/RadiologyAI';
 import ComingSoon from './pages/ComingSoon';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -19,6 +20,7 @@ import { Activity } from 'lucide-react';
 
 function AppContent() {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -39,6 +41,8 @@ function AppContent() {
     return <>{children}</>;
   };
 
+  const isRadiology = location.pathname === '/radiology';
+
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
@@ -47,9 +51,9 @@ function AppContent() {
         <ProtectedRoute>
           <div className="flex h-screen w-full bg-[#f8fafc] font-sans text-slate-900 overflow-hidden flex-col md:flex-row">
             <Sidebar />
-            <main className="flex-1 flex flex-col min-w-0 overflow-hidden pb-24 md:pb-0">
-              <div className="flex-1 overflow-y-auto px-4 md:px-10 custom-scrollbar">
-                <div className="w-full pt-10 md:pt-16 pb-32 max-w-7xl mx-auto h-auto min-h-full">
+            <main className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isRadiology ? '' : 'pb-24'} md:pb-0`}>
+              <div className={`flex-1 overflow-y-auto custom-scrollbar ${isRadiology ? 'p-0' : 'px-4 md:px-10'}`}>
+                <div className={`w-full h-auto min-h-full ${isRadiology ? 'max-w-none pt-0 pb-0' : 'pt-10 md:pt-16 pb-32 max-w-7xl mx-auto'}`}>
                   <Routes>
                     <Route index element={<Dashboard />} />
                     <Route path="case/setup" element={<CaseSetup />} />
@@ -57,7 +61,7 @@ function AppContent() {
                     <Route path="results/:id" element={<Results />} />
                     <Route path="history" element={<History />} />
                     <Route path="profile" element={<Profile />} />
-                    <Route path="radiology" element={<ComingSoon />} />
+                    <Route path="radiology" element={<RadiologyAI />} />
                     <Route path="pharmacology" element={<ComingSoon />} />
                     <Route path="anatomy" element={<ComingSoon />} />
                     <Route path="pathology" element={<ComingSoon />} />

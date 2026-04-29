@@ -329,7 +329,7 @@ export default function Sidebar() {
       </motion.aside>
 
       {/* Mobile Navigation Bar */}
-      {!location.pathname.startsWith('/case/') && location.pathname !== '/radiology' && (
+      {!location.pathname.startsWith('/case/') && !['/radiology', '/neurology', '/pathology', '/pharmacology', '/anatomy', '/pediatrics', '/tools/drug-checker', '/tools/progress', '/tools/leaderboard'].includes(location.pathname) && (
         <div className="md:hidden fixed bottom-6 left-6 right-6 z-[100]">
           <nav className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl shadow-blue-900/20">
             {navSections[0].items.filter(item => item.path !== '/profile').map((item) => (

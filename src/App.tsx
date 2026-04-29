@@ -13,7 +13,14 @@ import Results from './pages/Results';
 import History from './pages/History';
 import Profile from './pages/Profile';
 import RadiologyAI from './pages/RadiologyAI';
-import ComingSoon from './pages/ComingSoon';
+import Neurology from './pages/Neurology';
+import Pathology from './pages/Pathology';
+import Pharmacology from './pages/Pharmacology';
+import Anatomy from './pages/Anatomy';
+import Pediatrics from './pages/Pediatrics';
+import InteractionChecker from './pages/InteractionChecker';
+import Progress from './pages/Progress';
+import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Activity } from 'lucide-react';
@@ -41,7 +48,7 @@ function AppContent() {
     return <>{children}</>;
   };
 
-  const isRadiology = location.pathname === '/radiology';
+  const isModulePage = ['/radiology', '/neurology', '/pathology', '/pharmacology', '/anatomy', '/pediatrics', '/tools/drug-checker', '/tools/progress', '/tools/leaderboard'].includes(location.pathname);
 
   return (
     <Routes>
@@ -51,9 +58,9 @@ function AppContent() {
         <ProtectedRoute>
           <div className="flex h-screen w-full bg-[#f8fafc] font-sans text-slate-900 overflow-hidden flex-col md:flex-row">
             <Sidebar />
-            <main className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isRadiology ? '' : 'pb-24'} md:pb-0`}>
-              <div className={`flex-1 overflow-y-auto custom-scrollbar ${isRadiology ? 'p-0' : 'px-4 md:px-10'}`}>
-                <div className={`w-full h-auto min-h-full ${isRadiology ? 'max-w-none pt-0 pb-0' : 'pt-10 md:pt-16 pb-32 max-w-7xl mx-auto'}`}>
+            <main className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isModulePage ? '' : 'pb-24'} md:pb-0`}>
+              <div className={`flex-1 overflow-y-auto custom-scrollbar ${isModulePage ? 'p-0' : 'px-4 md:px-10'}`}>
+                <div className={`w-full h-auto min-h-full ${isModulePage ? 'max-w-none pt-0 pb-0' : 'pt-10 md:pt-16 pb-32 max-w-7xl mx-auto'}`}>
                   <Routes>
                     <Route index element={<Dashboard />} />
                     <Route path="case/setup" element={<CaseSetup />} />
@@ -62,14 +69,14 @@ function AppContent() {
                     <Route path="history" element={<History />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="radiology" element={<RadiologyAI />} />
-                    <Route path="pharmacology" element={<ComingSoon />} />
-                    <Route path="anatomy" element={<ComingSoon />} />
-                    <Route path="pathology" element={<ComingSoon />} />
-                    <Route path="neurology" element={<ComingSoon />} />
-                    <Route path="pediatrics" element={<ComingSoon />} />
-                    <Route path="tools/drug-checker" element={<ComingSoon />} />
-                    <Route path="tools/progress" element={<ComingSoon />} />
-                    <Route path="tools/leaderboard" element={<ComingSoon />} />
+                    <Route path="pharmacology" element={<Pharmacology />} />
+                    <Route path="anatomy" element={<Anatomy />} />
+                    <Route path="pathology" element={<Pathology />} />
+                    <Route path="neurology" element={<Neurology />} />
+                    <Route path="pediatrics" element={<Pediatrics />} />
+                    <Route path="tools/drug-checker" element={<InteractionChecker />} />
+                    <Route path="tools/progress" element={<Progress />} />
+                    <Route path="tools/leaderboard" element={<Leaderboard />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </div>

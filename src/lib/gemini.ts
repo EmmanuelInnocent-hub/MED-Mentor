@@ -2,7 +2,22 @@ import { GoogleGenAI, Type, HarmCategory, HarmBlockThreshold } from "@google/gen
 import { Case, Message } from "../types";
 
 // Standard initialization for Vite environment in AI Studio
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiClient: GoogleGenAI | null = null;
+
+function getAiClient() {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
+      console.warn("GEMINI_API_KEY not found. AI features will be disabled.");
+      // We still initialize to avoid null checks everywhere, but calls will fail
+      aiClient = new GoogleGenAI({ apiKey: "MISSING_KEY" });
+    } else {
+      aiClient = new GoogleGenAI({ apiKey });
+    }
+  }
+  return aiClient;
+}
+
 const MODEL_NAME = "gemini-flash-latest"; // Using the stable latest alias
 const SCORING_MODEL = "gemini-3.1-pro-preview"; // Using Pro for complex reasoning scoring
 
@@ -48,7 +63,7 @@ export async function getChatResponse(messages: Message[]) {
     return "I have received the clinical report. What are your first thoughts on our approach?";
   }
 
-  const response = await ai.models.generateContent({
+  const response = await getAiClient().models.generateContent({
     model: MODEL_NAME,
     contents: apiContents,
     config: {
@@ -65,6 +80,101 @@ export async function getChatResponse(messages: Message[]) {
   });
 
   return response.text || "Clinical processing error. Could you rephrase your last request?";
+}
+
+export async function getModuleResponse(moduleName: string, messages: Message[]) {
+  const moduleSystemPrompt = `
+You are a senior medical consultant and Socratic tutor specializing in ${moduleName}.
+Your goal is to guide the student through a clinical scenario in the ${moduleName} module.
+
+STUDENT'S GOAL:
+- Perform a systematic assessment.
+- Identify key clinical findings.
+- Propose a diagnostic and management plan.
+
+YOUR ROLE:
+- Be a Socratic mentor: Do not give answers. Ask guiding questions.
+- If the student makes a clinical error, challenge their reasoning politely.
+- Use a professional, encouraging, but rigorous academic tone.
+- Integrate relevant ${moduleName} principles into your feedback.
+- If they ask for help, provide a hint or a clinical pearl rather than the full answer.
+
+SCENARIO CONTEXT: The student is currently interacting with a specific clinical case in your department.
+`.trim();
+
+  const chatContents = messages
+    .filter(m => m.role !== 'system')
+    .map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+  let apiContents = [...chatContents];
+  while (apiContents.length > 0 && apiContents[0].role === 'model') {
+    apiContents.shift();
+  }
+
+  if (apiContents.length === 0) {
+    return `Welcome to the ${moduleName} rotation. I see our patient is ready for assessment. How would you like to begin?`;
+  }
+
+  const response = await getAiClient().models.generateContent({
+    model: MODEL_NAME,
+    contents: apiContents,
+    config: {
+      systemInstruction: moduleSystemPrompt,
+      temperature: 0.7,
+      safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE }
+      ]
+    },
+  });
+
+  return response.text || "I'm having trouble processing that clinical thought. Let's try reflecting on the primary symptoms again.";
+}
+
+export async function checkDrugInteraction(drugs: string[]) {
+  const prompt = `
+Analyze potential drug-drug interactions between: ${drugs.join(", ")}.
+Provide a structured medical report.
+
+Output format should be JSON:
+{
+  "severity": "Low" | "Moderate" | "Major" | "Contraindicated",
+  "mechanism": "string explaining how they interact",
+  "clinicalSignificance": "string explaining why this matters",
+  "recommendation": "string recommending action",
+  "references": ["string"]
+}
+`;
+
+  const response = await getAiClient().models.generateContent({
+    model: MODEL_NAME,
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          severity: { type: Type.STRING, enum: ["Low", "Moderate", "Major", "Contraindicated"] },
+          mechanism: { type: Type.STRING },
+          clinicalSignificance: { type: Type.STRING },
+          recommendation: { type: Type.STRING },
+          references: { type: Type.ARRAY, items: { type: Type.STRING } }
+        },
+        required: ["severity", "mechanism", "clinicalSignificance", "recommendation"]
+      }
+    }
+  });
+
+  try {
+    return JSON.parse(response.text || "{}");
+  } catch (e) {
+    return { error: "Failed to analyze interactions" };
+  }
 }
 
 function systemPromptContent(messages: Message[]): string {
@@ -99,7 +209,7 @@ JSON Output format:
 }
 `;
 
-  const response = await ai.models.generateContent({
+  const response = await getAiClient().models.generateContent({
     model: SCORING_MODEL,
     contents: [{ role: 'user', parts: [{ text: scoringPrompt }] }],
     config: {

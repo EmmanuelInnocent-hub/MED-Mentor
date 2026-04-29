@@ -149,6 +149,10 @@ export default function RadiologyAI() {
   const navigate = useNavigate();
   const initialCase = (caseLibrary[0] as any).children?.[0]?.children?.[0] || caseLibrary[0];
   const [activeCase, setActiveCase] = useState<CaseItem>(initialCase);
+  const [activeTool, setActiveTool] = useState<'viewer' | 'zoom' | 'annotate' | 'window'>('viewer');
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [windowPreset, setWindowPreset] = useState<'lung' | 'soft-tissue' | 'bone'>('lung');
+  
   const [messages, setMessages] = useState<Message[]>([
     { 
       role: 'assistant', 
@@ -159,15 +163,63 @@ export default function RadiologyAI() {
   const [isTyping, setIsTyping] = useState(false);
   const [isUploadVisible, setIsUploadVisible] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const windowFilters = {
+    'lung': 'contrast(1.2) brightness(0.9) grayscale(1)',
+    'soft-tissue': 'contrast(1.5) brightness(0.6) grayscale(1)',
+    'bone': 'contrast(2) brightness(1.2) grayscale(1)'
+  };
+
+  const windowLabels = {
+    'lung': 'W:1500 L:-600',
+    'soft-tissue': 'W:400 L:40',
+    'bone': 'W:2000 L:400'
+  };
+
+  const handleCaseSelect = (item: CaseItem) => {
+    setActiveCase(item);
+    setMessages([
+      { 
+        role: 'assistant', 
+        content: `Loading ${item.name}. ${item.description || 'System ready.'}\n\nHow would you like to proceed with this case?` 
+      }
+    ]);
+    setZoomLevel(1.0);
+    setWindowPreset('lung');
+  };
+
+  const cycleWindow = () => {
+    const presets: ('lung' | 'soft-tissue' | 'bone')[] = ['lung', 'soft-tissue', 'bone'];
+    const nextIndex = (presets.indexOf(windowPreset) + 1) % presets.length;
+    setWindowPreset(presets[nextIndex]);
+    setActiveTool('window');
+  };
+
+  const useChip = (text: string) => {
+    setInput(text);
+    // Use a timeout to ensure state update before sending
+    setTimeout(() => {
+      handleSend(text);
+    }, 0);
+  };
+
+  const autoResize = () => {
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = 'auto';
+      textAreaRef.current.style.height = `${Math.min(textAreaRef.current.scrollHeight, 80)}px`;
+    }
+  };
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    autoResize();
+  }, [input]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isTyping) return;
+  const handleSend = async (manualInput?: string) => {
+    const messageContent = manualInput || input;
+    if (!messageContent.trim() || isTyping) return;
 
-    const userMsg = input.trim();
+    const userMsg = messageContent.trim();
     setInput('');
     const newMessages: Message[] = [...messages, { role: 'user', content: userMsg }];
     setMessages(newMessages);
@@ -215,7 +267,7 @@ export default function RadiologyAI() {
                 key={item.id} 
                 item={item} 
                 activeId={activeCase.id} 
-                onSelect={setActiveCase}
+                onSelect={handleCaseSelect}
               />
             ))}
           </div>
@@ -258,9 +310,30 @@ export default function RadiologyAI() {
             
             <div className="hidden md:flex items-center gap-2 shrink-0">
               <div className="flex bg-[#04070a] rounded-lg p-1 border border-white/5">
-                <button className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-[10px] font-bold">Viewer</button>
-                <button className="px-3 py-1.5 text-slate-500 text-[10px] font-bold hover:text-white">Analysis</button>
-                <button className="px-3 py-1.5 text-slate-500 text-[10px] font-bold hover:text-white">Report</button>
+                <button 
+                  onClick={() => setActiveTool('zoom')}
+                  className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all ${activeTool === 'zoom' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'}`}
+                >
+                  Zoom
+                </button>
+                <button 
+                  onClick={() => setActiveTool('annotate')}
+                  className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all ${activeTool === 'annotate' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'}`}
+                >
+                  Annotate
+                </button>
+                <button 
+                  onClick={cycleWindow}
+                  className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all ${activeTool === 'window' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'}`}
+                >
+                  Window
+                </button>
+                <button 
+                  onClick={() => setIsUploadVisible(true)}
+                  className="px-3 py-1.5 text-slate-500 text-[10px] font-bold hover:text-white"
+                >
+                  Upload
+                </button>
               </div>
             </div>
 
@@ -273,9 +346,28 @@ export default function RadiologyAI() {
           </div>
 
           {/* Imaging Area */}
-          <div className="flex-1 relative flex items-center justify-center p-4 md:p-8 overflow-hidden">
-            <div className="relative w-full h-full lg:max-w-2xl flex items-center justify-center bg-[#000] shadow-[0_0_100px_rgba(37,99,235,0.05)] border border-white/5 rounded-sm">
-              <svg className="w-full h-full p-4 md:p-8" viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
+          <div 
+            className="flex-1 relative flex items-center justify-center p-4 md:p-8 overflow-hidden cursor-crosshair"
+            onWheel={(e) => {
+              if (activeTool === 'zoom') {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                setZoomLevel(prev => Math.max(0.5, Math.min(prev + delta, 5.0)));
+              }
+            }}
+          >
+            <div 
+              className={`relative w-full h-full lg:max-w-2xl flex items-center justify-center bg-[#000] shadow-[0_0_100px_rgba(37,99,235,0.05)] border transition-all duration-300 ${activeTool !== 'viewer' ? 'border-blue-500/30' : 'border-white/5'} rounded-sm overflow-hidden`}
+            >
+              <svg 
+                className="w-full h-full p-4 md:p-8 transition-all duration-500" 
+                style={{ 
+                  filter: windowFilters[windowPreset],
+                  transform: `scale(${zoomLevel})`
+                }}
+                viewBox="0 0 600 700" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <rect width="600" height="700" fill="#000"/>
                 <ellipse cx="300" cy="350" rx="200" ry="280" fill="none" stroke="#111" strokeWidth="2"/>
                 
@@ -309,17 +401,32 @@ export default function RadiologyAI() {
               </svg>
 
               {/* Annotation Markers */}
-              <div className="absolute left-[70%] top-[68%] group/marker cursor-help">
-                <div className="w-4 h-4 rounded-full border border-blue-500/50 bg-blue-500/10 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+              <div 
+                className="absolute left-[70%] top-[68%] group/pneu cursor-pointer z-20"
+                onClick={() => useChip("I've identified a focal opacity in the right lower lobe. What's the next physiological step?")}
+              >
+                <div className="w-4 h-4 rounded-full border border-red-500/50 bg-red-500/10 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
                 </div>
-                <div className="absolute top-1/2 left-full ml-3 -translate-y-1/2 opacity-0 lg:group-hover/marker:opacity-100 transition-opacity whitespace-nowrap bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded text-[10px] font-mono text-blue-400 z-20">
-                  RLL Consolidation
+                <div className="absolute top-1/2 left-full ml-3 -translate-y-1/2 opacity-0 lg:group-hover/pneu:opacity-100 transition-opacity whitespace-nowrap bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded text-[10px] font-mono text-red-400">
+                  Opacity — RLL (68%, 64%)
+                </div>
+              </div>
+
+              <div 
+                className="absolute left-[47%] top-[57%] group/heart cursor-pointer z-20"
+                onClick={() => useChip("The heart shadow looks slightly enlarged. Does this patient have cardiomegaly?")}
+              >
+                <div className="w-4 h-4 rounded-full border border-amber-500/50 bg-amber-500/10 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                </div>
+                <div className="absolute top-1/2 left-full ml-3 -translate-y-1/2 opacity-0 lg:group-hover/heart:opacity-100 transition-opacity whitespace-nowrap bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded text-[10px] font-mono text-amber-400">
+                  Cardiac Silhouette (44%, 55%)
                 </div>
               </div>
 
               {/* Overlay Metadata */}
-              <div className="absolute top-4 md:top-6 left-4 md:left-6 font-mono text-[8px] md:text-[9px] text-slate-700 uppercase tracking-widest leading-relaxed">
+              <div className="absolute top-4 md:top-6 left-4 md:left-6 font-mono text-[8px] md:text-[9px] text-slate-700 uppercase tracking-widest leading-relaxed pointer-events-none">
                 PA CHEST · 58M · 82KG<br />
                 INST: MEDMENTOR AI LAB<br />
                 ACQ: 2026-04-27 18:28
@@ -327,14 +434,14 @@ export default function RadiologyAI() {
             </div>
 
             {/* Viewer HUD */}
-            <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 flex gap-2 md:gap-4 flex-wrap">
+            <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 flex gap-2 md:gap-4 flex-wrap z-30">
               <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-1.5 md:py-2 bg-black/40 backdrop-blur-md border border-white/5 rounded-lg shrink-0">
                 <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                <span className="text-[9px] md:text-[10px] font-mono text-slate-400 tracking-tighter">W: 1544 L: -620</span>
+                <span className="text-[9px] md:text-[10px] font-mono text-slate-400 tracking-tighter uppercase">{windowLabels[windowPreset]}</span>
               </div>
               <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-1.5 md:py-2 bg-black/40 backdrop-blur-md border border-white/5 rounded-lg shrink-0">
                 <Maximize className="w-3 h-3 text-slate-500" />
-                <span className="text-[9px] md:text-[10px] font-mono text-slate-400 tracking-tighter">MAG: 1.0X</span>
+                <span className="text-[9px] md:text-[10px] font-mono text-slate-400 tracking-tighter uppercase">MAG: {zoomLevel.toFixed(1)}X</span>
               </div>
             </div>
           </div>
@@ -352,17 +459,38 @@ export default function RadiologyAI() {
 
           <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar bg-[#04070a]">
             {messages.filter(m => m.role !== 'system').map((msg, idx) => (
-              <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                {msg.role === 'assistant' && (
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">Attending Radiologist</span>
-                )}
-                <div className={`max-w-[90%] p-3 md:p-4 rounded-2xl text-[11px] md:text-xs leading-relaxed ${
-                  msg.role === 'user' 
-                    ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-500/10' 
-                    : 'bg-[#111] text-slate-300 rounded-tl-none border border-white/5'
-                }`}>
-                  {msg.content}
+              <div key={idx} className="space-y-4">
+                <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                  {msg.role === 'assistant' && (
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">Attending Radiologist</span>
+                  )}
+                  <div className={`max-w-[90%] p-3 md:p-4 rounded-2xl text-[11px] md:text-xs leading-relaxed ${
+                    msg.role === 'user' 
+                      ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-500/10' 
+                      : 'bg-[#111] text-slate-300 rounded-tl-none border border-white/5'
+                  }`}>
+                    {msg.content}
+                  </div>
                 </div>
+                
+                {idx === 0 && msg.role === 'assistant' && (
+                  <div className="grid grid-cols-2 gap-2 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                    {[
+                      'Check lung fields',
+                      'Review cardiac size',
+                      'Examine hila',
+                      'Look at bones'
+                    ].map((chip) => (
+                      <button 
+                        key={chip}
+                        onClick={() => useChip(chip)}
+                        className="p-2.5 bg-[#111] border border-white/5 hover:border-blue-500/30 rounded-xl text-left text-[10px] text-slate-400 hover:text-white transition-all uppercase font-black tracking-tight"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
             {isTyping && (
@@ -381,6 +509,7 @@ export default function RadiologyAI() {
           <div className="p-4 md:p-6 border-t border-white/5 bg-[#080c14] shrink-0">
             <div className="relative group">
               <textarea
+                ref={textAreaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -389,8 +518,8 @@ export default function RadiologyAI() {
                     handleSend();
                   }
                 }}
-                className="w-full bg-[#04070a] border border-white/5 rounded-2xl p-3 md:p-4 pr-12 md:pr-14 text-[11px] md:text-xs resize-none h-20 md:h-24 focus:border-blue-500/50 transition-all custom-scrollbar outline-none"
-                placeholder="Describe findings..."
+                className="w-full bg-[#04070a] border border-white/5 rounded-2xl p-3 md:p-4 pr-12 md:pr-14 text-[11px] md:text-xs resize-none h-12 md:h-14 focus:border-blue-500/50 transition-all custom-scrollbar outline-none"
+                placeholder="Describe what you see..."
               />
               <button 
                 onClick={handleSend}

@@ -17,6 +17,11 @@ import {
   FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  Panel, 
+  Group as PanelGroup, 
+  Separator as PanelResizeHandle 
+} from 'react-resizable-panels';
 import { getChatResponse } from '../lib/gemini';
 import { Message } from '../types';
 
@@ -177,6 +182,18 @@ export default function RadiologyAI() {
     'bone': 'W:2000 L:400'
   };
 
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1280);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 1280);
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleCaseSelect = (item: CaseItem) => {
     setActiveCase(item);
     setMessages([
@@ -251,39 +268,56 @@ export default function RadiologyAI() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#04070a] relative">
-      <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+      <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
         
         {/* Sidebar - Case Library */}
-        <div className="hidden xl:flex w-72 flex-col border-r border-white/5 bg-[#080c14]">
-          <div className="p-6 border-b border-white/5 flex items-center justify-between">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Case Library</h3>
-            <button className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 transition-colors">
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto custom-scrollbar pt-2">
-            {caseLibrary.map((item) => (
-              <RecursiveCaseItem 
-                key={item.id} 
-                item={item} 
-                activeId={activeCase.id} 
-                onSelect={handleCaseSelect}
-              />
-            ))}
-          </div>
-          <div className="p-6 border-t border-white/5">
-            <button 
-              onClick={() => setIsUploadVisible(true)}
-              className="w-full py-3 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-400 hover:text-white hover:border-white/20 transition-all flex items-center justify-center gap-2 group"
+        {isLargeScreen && (
+          <>
+            <Panel 
+              defaultSize={20} 
+              minSize={15} 
+              maxSize={30}
+              className="flex flex-col border-r border-white/5 bg-[#080c14]"
             >
-              <Upload className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
-              <span className="text-[10px] font-black uppercase tracking-widest">External DICOM</span>
-            </button>
-          </div>
-        </div>
+              <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Case Library</h3>
+                <button className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 transition-colors">
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto custom-scrollbar pt-2">
+                {caseLibrary.map((item) => (
+                  <RecursiveCaseItem 
+                    key={item.id} 
+                    item={item} 
+                    activeId={activeCase.id} 
+                    onSelect={handleCaseSelect}
+                  />
+                ))}
+              </div>
+              <div className="p-6 border-t border-white/5">
+                <button 
+                  onClick={() => setIsUploadVisible(true)}
+                  className="w-full py-3 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-400 hover:text-white hover:border-white/20 transition-all flex items-center justify-center gap-2 group"
+                >
+                  <Upload className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">External DICOM</span>
+                </button>
+              </div>
+            </Panel>
+
+            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-blue-500/20 active:bg-blue-500/40 relative z-50">
+              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+            </PanelResizeHandle>
+          </>
+        )}
 
         {/* Main Viewer area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-[#020408] border-b lg:border-b-0 lg:border-r border-white/5">
+        <Panel 
+          defaultSize={isLargeScreen ? 45 : 60} 
+          minSize={30}
+          className="flex flex-col min-w-0 bg-[#020408] border-b lg:border-b-0 lg:border-r border-white/5"
+        >
           {/* Top Bar Navigation */}
           <div className="px-4 md:px-6 py-4 border-b border-white/5 flex items-center justify-between bg-[#080c14]/80 backdrop-blur-xl shrink-0">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
@@ -445,10 +479,18 @@ export default function RadiologyAI() {
               </div>
             </div>
           </div>
-        </div>
+        </Panel>
+
+        <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-blue-500/20 active:bg-blue-500/40 relative z-50">
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+        </PanelResizeHandle>
 
         {/* Chat / AI Analysis Panel */}
-        <div className="w-full lg:w-[350px] xl:w-[400px] flex flex-col bg-[#05080c] lg:bg-[#080c14] border-t lg:border-t-0 border-white/5 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] lg:h-auto shrink-0">
+        <Panel 
+          defaultSize={35} 
+          minSize={25}
+          className="flex flex-col bg-[#05080c] lg:bg-[#080c14] border-t lg:border-t-0 border-white/5 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] lg:h-auto shrink-0"
+        >
           <div className="px-6 py-4 md:py-6 border-b border-white/5 shrink-0">
             <div className="flex items-center gap-3 mb-1 min-w-0">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shrink-0" />
@@ -522,7 +564,7 @@ export default function RadiologyAI() {
                 placeholder="Describe what you see..."
               />
               <button 
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim() || isTyping}
                 className="absolute bottom-3 md:bottom-4 right-3 md:right-4 p-2.5 md:p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all disabled:opacity-30 disabled:grayscale shadow-lg shadow-blue-500/20 active:scale-95"
               >
@@ -530,8 +572,8 @@ export default function RadiologyAI() {
               </button>
             </div>
           </div>
-        </div>
-      </div>
+        </Panel>
+      </PanelGroup>
 
       {/* Full-Screen Upload Overlay */}
       <AnimatePresence>

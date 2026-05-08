@@ -13,6 +13,11 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Panel, 
+  Group as PanelGroup, 
+  Separator as PanelResizeHandle 
+} from 'react-resizable-panels';
 import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
@@ -41,6 +46,18 @@ export default function Pediatrics() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
+
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1280);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 1280);
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSendMessage = async () => {
     if (!input.trim() || isTyping) return;
@@ -76,66 +93,82 @@ export default function Pediatrics() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+      <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
         
         {/* Sidebar - Age Groups & Calc */}
-        <div className="hidden xl:flex w-72 flex-col border-r border-[#1e2a3a] bg-[#111620]">
-          <div className="p-6 border-b border-[#1e2a3a]">
-             <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Age Groups</h3>
-          </div>
-          <div className="flex-1 overflow-y-auto space-y-px custom-scrollbar">
-            {ageGroups.map((ag) => (
-              <button 
-                key={ag.id}
-                onClick={() => setActiveAgeGroup(ag.id)}
-                className={`w-full text-left px-6 py-4 flex flex-col transition-all ${
-                  activeAgeGroup === ag.id ? 'bg-[#161d2a] border-l-2 border-pink-500' : 'hover:bg-[#161d2a]/50 border-l-2 border-transparent'
-                }`}
-              >
-                <div className="text-[13px] font-bold text-white mb-0.5">{ag.name}</div>
-                <div className="text-[10px] font-mono text-[#5a7090] mb-2">{ag.range}</div>
-                <span className={`self-start text-[8px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                  ag.color === 'pink' ? 'bg-pink-500/10 text-pink-400' : 
-                  ag.color === 'amber' ? 'bg-amber-500/10 text-amber-400' : 'bg-blue-500/10 text-blue-400'
-                }`}>
-                  {ag.badge}
-                </span>
-              </button>
-            ))}
-          </div>
+        {isLargeScreen && (
+          <>
+            <Panel 
+              defaultSize={20} 
+              minSize={15} 
+              maxSize={25}
+              className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
+            >
+              <div className="p-6 border-b border-[#1e2a3a]">
+                 <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Age Groups</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto space-y-px custom-scrollbar">
+                {ageGroups.map((ag) => (
+                  <button 
+                    key={ag.id}
+                    onClick={() => setActiveAgeGroup(ag.id)}
+                    className={`w-full text-left px-6 py-4 flex flex-col transition-all ${
+                      activeAgeGroup === ag.id ? 'bg-[#161d2a] border-l-2 border-pink-500' : 'hover:bg-[#161d2a]/50 border-l-2 border-transparent'
+                    }`}
+                  >
+                    <div className="text-[13px] font-bold text-white mb-0.5">{ag.name}</div>
+                    <div className="text-[10px] font-mono text-[#5a7090] mb-2">{ag.range}</div>
+                    <span className={`self-start text-[8px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                      ag.color === 'pink' ? 'bg-pink-500/10 text-pink-400' : 
+                      ag.color === 'amber' ? 'bg-amber-500/10 text-amber-400' : 'bg-blue-500/10 text-blue-400'
+                    }`}>
+                      {ag.badge}
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-          <div className="p-4 m-4 bg-[#161d2a] border border-[#243044] rounded-2xl shadow-xl shadow-pink-900/10">
-             <div className="text-[9px] font-mono uppercase tracking-widest text-[#5a7090] mb-4 flex items-center gap-2">
-               <Calculator className="w-3 h-3 text-pink-500" /> Weight-based Dosing
-             </div>
-             <div className="space-y-4">
-               <div className="flex items-center justify-between">
-                 <span className="text-xs text-[#a8b8cc]">Weight (kg)</span>
-                 <input 
-                  type="number" 
-                  step="0.1"
-                  value={weight} 
-                  onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
-                  className="w-16 bg-[#1c2537] border border-[#243044] rounded px-2 py-1 text-xs font-mono text-center text-white focus:border-pink-500/50 outline-none" 
-                 />
-               </div>
-               <div className="space-y-2 pt-2 border-t border-[#243044]">
-                 {dosages.map(d => (
-                   <div key={d.l} className="flex items-center justify-between text-[11px]">
-                     <div className="flex flex-col">
-                        <span className="text-[#a8b8cc]">{d.l}</span>
-                        <span className="text-[8px] text-[#5a7090]">{d.dosage}{d.unit}</span>
-                     </div>
-                     <span className="font-mono text-green-500 font-bold">{Math.round(weight * d.dosage)} mg</span>
+              <div className="p-4 m-4 bg-[#161d2a] border border-[#243044] rounded-2xl shadow-xl shadow-pink-900/10">
+                 <div className="text-[9px] font-mono uppercase tracking-widest text-[#5a7090] mb-4 flex items-center gap-2">
+                   <Calculator className="w-3 h-3 text-pink-500" /> Weight-based Dosing
+                 </div>
+                 <div className="space-y-4">
+                   <div className="flex items-center justify-between">
+                     <span className="text-xs text-[#a8b8cc]">Weight (kg)</span>
+                     <input 
+                      type="number" 
+                      step="0.1"
+                      value={weight} 
+                      onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
+                      className="w-16 bg-[#1c2537] border border-[#243044] rounded px-2 py-1 text-xs font-mono text-center text-white focus:border-pink-500/50 outline-none" 
+                     />
                    </div>
-                 ))}
-               </div>
-             </div>
-          </div>
-        </div>
+                   <div className="space-y-2 pt-2 border-t border-[#243044]">
+                     {dosages.map(d => (
+                       <div key={d.l} className="flex items-center justify-between text-[11px]">
+                         <div className="flex flex-col">
+                            <span className="text-[#a8b8cc]">{d.l}</span>
+                            <span className="text-[8px] text-[#5a7090]">{d.dosage}{d.unit}</span>
+                         </div>
+                         <span className="font-mono text-green-500 font-bold">{Math.round(weight * d.dosage)} mg</span>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+              </div>
+            </Panel>
+            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-pink-500/20 active:bg-pink-500/40 relative z-50">
+              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+            </PanelResizeHandle>
+          </>
+        )}
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-[#0a0e14]">
+        <Panel 
+          defaultSize={isLargeScreen ? 45 : 60} 
+          minSize={30}
+          className="flex flex-col min-w-0 bg-[#0a0e14]"
+        >
           <div className="px-6 py-4 border-b border-[#1e2a3a] flex items-center justify-between bg-[#111620]/80 backdrop-blur-xl shrink-0">
             <div className="flex items-center gap-4">
               <button 
@@ -220,10 +253,19 @@ export default function Pediatrics() {
                 </div>
              </motion.div>
           </div>
-        </div>
+        </Panel>
+
+        <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-pink-500/20 active:bg-pink-500/40 relative z-50">
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+        </PanelResizeHandle>
 
         {/* Chat / Attending Panel */}
-        <div className="w-full lg:w-[450px] flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+        <Panel 
+          defaultSize={30} 
+          minSize={20}
+          maxSize={50}
+          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] lg:h-auto shrink-0"
+        >
            <div className="px-6 py-6 border-b border-[#1e2a3a]">
              <h3 className="text-sm font-semibold text-white mb-1">Paeds Attending</h3>
              <p className="text-[11px] font-mono text-[#5a7090]">Active clinical case · Socratic tutor</p>
@@ -290,8 +332,8 @@ export default function Pediatrics() {
                 </button>
              </div>
            </div>
-        </div>
-      </div>
+        </Panel>
+      </PanelGroup>
     </div>
   );
 }

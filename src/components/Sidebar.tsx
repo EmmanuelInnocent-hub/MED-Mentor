@@ -30,7 +30,7 @@ export default function Sidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();
@@ -121,7 +121,7 @@ export default function Sidebar() {
                 <div className="flex justify-between items-start mb-6 relative z-10">
                   <div className="w-16 h-16 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 p-1">
                     <div className="w-full h-full rounded-2xl bg-white flex items-center justify-center text-blue-600 font-display font-black text-xl shadow-lg">
-                      {profile?.firstName?.slice(0, 2).toUpperCase() || 'Dr'}
+                      {(profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel').slice(0, 2).toUpperCase()}
                     </div>
                   </div>
                   <button 
@@ -134,7 +134,7 @@ export default function Sidebar() {
                 
                 <div className="relative z-10">
                   <h2 className="text-white font-display font-black text-lg tracking-tight">
-                    Dr. {profile?.firstName || 'User'}
+                    Dr. {profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel'}
                   </h2>
                   <p className="text-blue-100/70 text-[10px] font-mono uppercase tracking-[0.2em] font-black mt-0.5">
                     {profile?.rank || 'Resident Specialist'}
@@ -281,7 +281,7 @@ export default function Sidebar() {
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-sm shrink-0 shadow-inner ring-2 ring-blue-500/20">
-                  {profile?.firstName?.slice(0, 2).toUpperCase() || 'Dr'}
+                  {(profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel').slice(0, 2).toUpperCase()}
                 </div>
                 <AnimatePresence>
                   {isExpanded && (
@@ -291,7 +291,7 @@ export default function Sidebar() {
                       exit={{ opacity: 0 }}
                       className="min-w-0 flex-1"
                     >
-                      <p className="font-bold text-white text-sm truncate leading-tight">Dr. {profile?.firstName || 'User'}</p>
+                      <p className="font-bold text-white text-sm truncate leading-tight">Dr. {profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel'}</p>
                       <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.15em] mt-0.5">{profile?.rank || 'Resident'}</p>
                     </motion.div>
                   )}
@@ -356,7 +356,7 @@ export default function Sidebar() {
                 location.pathname === '/profile' ? 'border-blue-400' : 'border-white/10'
               }`}
             >
-              {profile?.firstName?.slice(0, 2).toUpperCase() || 'Dr'}
+              {(profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel').slice(0, 2).toUpperCase()}
             </NavLink>
           </nav>
         </div>

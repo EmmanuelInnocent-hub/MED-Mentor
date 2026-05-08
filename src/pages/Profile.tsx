@@ -131,7 +131,7 @@ export default function Profile() {
               <div className="relative">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-white/5 p-1 bg-white/5">
                   <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-2xl sm:text-3xl md:text-4xl font-display font-black text-white relative shadow-2xl">
-                    {profile?.firstName?.slice(0, 2).toUpperCase() || 'DR'}
+                    {(profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel').slice(0, 2).toUpperCase()}
                     <div className="absolute bottom-0 right-0 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-emerald-500 border-2 border-slate-900 rounded-full flex items-center justify-center shadow-lg">
                       <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white" />
                     </div>
@@ -141,7 +141,7 @@ export default function Profile() {
               
               <div className="space-y-0.5 md:space-y-1">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white leading-tight">
-                  Dr. {profile?.firstName || 'User'}
+                  Dr. {profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel'}
                 </h2>
                 <div className="flex flex-wrap justify-center sm:justify-start items-center gap-x-3 gap-y-1">
                   <p className="text-[10px] md:text-xs text-slate-400 font-mono tracking-[0.15em] uppercase">

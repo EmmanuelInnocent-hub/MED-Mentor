@@ -122,7 +122,7 @@ export default function Dashboard() {
       <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 shrink-0">
         <div className="space-y-1 text-center md:text-left">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
-            Welcome back, Dr. {profile?.firstName || 'Emmanuel'}
+            Welcome back, Dr. {profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel'}
           </h1>
           <p className="text-slate-500 text-sm">
             You have {stats.completed} active sessions in your rotation. Review your performance.

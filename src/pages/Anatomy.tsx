@@ -13,6 +13,11 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Panel, 
+  Group as PanelGroup, 
+  Separator as PanelResizeHandle 
+} from 'react-resizable-panels';
 import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
@@ -104,6 +109,18 @@ export default function Anatomy() {
 
   const hotspots = allHotspots[activeSystem] || [];
 
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1280);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 1280);
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
@@ -146,33 +163,50 @@ export default function Anatomy() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+      <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
         
         {/* Sidebar - Systems */}
-        <div className="hidden xl:flex w-64 flex-col border-r border-[#1e2a3a] bg-[#111620]">
-          <div className="p-6 border-b border-[#1e2a3a]">
-             <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Body Systems</h3>
-          </div>
-          <div className="flex-1 overflow-y-auto space-y-px custom-scrollbar">
-            {bodySystems.map((sys) => (
-              <button 
-                key={sys.id}
-                onClick={() => setActiveSystem(sys.id)}
-                className={`w-full text-left px-6 py-3.5 flex items-center gap-3 transition-all ${
-                  activeSystem === sys.id ? 'bg-[#161d2a] border-l-2 border-teal-400' : 'hover:bg-[#161d2a]/50 border-l-2 border-transparent'
-                }`}
-              >
-                <div className={`w-2 h-2 rounded-full ${sys.color}`} />
-                <span className={`text-[13px] font-medium ${activeSystem === sys.id ? 'text-white' : 'text-[#a8b8cc]'}`}>
-                  {sys.name}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+        {isLargeScreen && (
+          <>
+            <Panel 
+              defaultSize={20} 
+              minSize={15} 
+              maxSize={25}
+              className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
+            >
+              <div className="p-6 border-b border-[#1e2a3a]">
+                 <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Body Systems</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto space-y-px custom-scrollbar">
+                {bodySystems.map((sys) => (
+                  <button 
+                    key={sys.id}
+                    onClick={() => setActiveSystem(sys.id)}
+                    className={`w-full text-left px-6 py-3.5 flex items-center gap-3 transition-all ${
+                      activeSystem === sys.id ? 'bg-[#161d2a] border-l-2 border-teal-400' : 'hover:bg-[#161d2a]/50 border-l-2 border-transparent'
+                    }`}
+                  >
+                    <div className={`w-2 h-2 rounded-full ${sys.color}`} />
+                    <span className={`text-[13px] font-medium ${activeSystem === sys.id ? 'text-white' : 'text-[#a8b8cc]'}`}>
+                      {sys.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </Panel>
+
+            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
+              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+            </PanelResizeHandle>
+          </>
+        )}
 
         {/* Main Viewer Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-[#0d1a20] to-[#050a0e] relative">
+        <Panel 
+          defaultSize={isLargeScreen ? 45 : 60} 
+          minSize={30}
+          className="flex flex-col min-w-0 bg-gradient-to-br from-[#0d1a20] to-[#050a0e] relative"
+        >
           {/* Top Bar */}
           <div className="absolute top-0 left-0 right-0 px-6 py-4 border-b border-[#1e2a3a]/30 flex items-center justify-between bg-[#111620]/40 backdrop-blur-xl z-10">
              <div className="flex items-center gap-4">
@@ -232,10 +266,18 @@ export default function Anatomy() {
               )}
              </AnimatePresence>
           </div>
-        </div>
+        </Panel>
+
+        <PanelResizeHandle className="hidden lg:block w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+        </PanelResizeHandle>
 
         {/* Tutor Panel */}
-        <div className="w-full lg:w-[450px] flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+        <Panel 
+          defaultSize={30} 
+          minSize={25}
+          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)]"
+        >
            <div className="px-6 py-6 border-b border-[#1e2a3a] shrink-0">
              <h3 className="text-sm font-semibold text-white mb-1">Anatomy Tutor</h3>
              <p className="text-[11px] font-mono text-[#5a7090] uppercase tracking-wider">{activeSystem} LAB ACTIVE</p>
@@ -302,8 +344,8 @@ export default function Anatomy() {
                 </button>
               </div>
            </div>
-        </div>
-      </div>
+        </Panel>
+      </PanelGroup>
     </div>
   );
 }

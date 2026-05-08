@@ -14,6 +14,11 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Panel, 
+  Group as PanelGroup, 
+  Separator as PanelResizeHandle 
+} from 'react-resizable-panels';
 import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
@@ -44,6 +49,18 @@ export default function Pathology() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1280);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 1280);
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleSendMessage = async () => {
     if (!input.trim() || isTyping) return;
 
@@ -64,9 +81,13 @@ export default function Pathology() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+      <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
         
-        <div className="flex-1 flex flex-col min-w-0 bg-[#0d1008] border-r border-[#1e2a3a]">
+        <Panel 
+          defaultSize={isLargeScreen ? 65 : 100} 
+          minSize={40}
+          className="flex flex-col min-w-0 bg-[#0d1008]"
+        >
           {/* Top Bar */}
           <div className="px-6 py-4 border-b border-[#1e2a3a] flex items-center justify-between bg-[#111620]/80 backdrop-blur-xl shrink-0">
             <div className="flex items-center gap-4">
@@ -101,95 +122,105 @@ export default function Pathology() {
             </div>
           </div>
 
-          {/* Slide Viewer Area */}
-          <div className="flex-1 relative flex items-center justify-center p-4 md:p-8 overflow-hidden">
-            <motion.div 
-              animate={{ scale: zoom }}
-              className="relative w-full h-full lg:max-w-4xl flex items-center justify-center bg-[#f5e8e0] shadow-2xl rounded-sm border border-black/20 overflow-hidden"
-            >
-              <svg className="w-full h-full p-4" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
-                <rect width="900" height="500" fill="#f5e8e0"/>
-                <rect width="900" height="500" fill="#e8d5c8" opacity=".5"/>
-                <g opacity={activeThumb === 'pas' ? 0.3 : 0.9}>
-                   {/* Simulated glands */}
-                  <ellipse cx="140" cy="120" rx={55 + (activeThumb === '100x' ? 20 : 0)} ry={40} fill={activeThumb === 'ck7' ? "#a0b8c8" : "#c8a0b8"} stroke={activeThumb === 'ck7' ? "#5a7a8b" : "#8b5a7a"} strokeWidth="1.5"/>
-                  <ellipse cx="500" cy="150" rx={65 + (activeThumb === '10x' ? -20 : 0)} ry={48} fill={activeThumb === 'ck7' ? "#90a8b8" : "#b890a8"} stroke={activeThumb === 'ck7' ? "#4a6a7a" : "#7a4a6a"} strokeWidth="2"/>
-                  <ellipse cx="740" cy="300" rx={58} ry={44} fill={activeThumb === 'ck7' ? "#a0b8c8" : "#c8a0b8"} stroke="#8b5a7a" strokeWidth="1.5"/>
-                  {/* Nuclei */}
-                  <g fill={activeThumb === 'pas' ? "#800040" : "#3a1a4a"}>
-                    <circle cx="120" cy="110" r="5"/><circle cx="140" cy="100" r="6"/><circle cx="160" cy="120" r="5"/>
-                    <circle cx="480" cy="140" r="8"/><circle cx="510" cy="130" r="7"/><circle cx="530" cy="160" r="8"/>
+          <div className="flex-1 flex flex-col min-w-0 bg-[#0d1008] relative">
+            {/* Slide Viewer Area */}
+            <div className="flex-1 relative flex items-center justify-center p-4 md:p-8 overflow-hidden">
+              <motion.div 
+                animate={{ scale: zoom }}
+                className="relative w-full h-full lg:max-w-4xl flex items-center justify-center bg-[#f5e8e0] shadow-2xl rounded-sm border border-black/20 overflow-hidden"
+              >
+                <svg className="w-full h-full p-4" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="900" height="500" fill="#f5e8e0"/>
+                  <rect width="900" height="500" fill="#e8d5c8" opacity=".5"/>
+                  <g opacity={activeThumb === 'pas' ? 0.3 : 0.9}>
+                     {/* Simulated glands */}
+                    <ellipse cx="140" cy="120" rx={55 + (activeThumb === '100x' ? 20 : 0)} ry={40} fill={activeThumb === 'ck7' ? "#a0b8c8" : "#c8a0b8"} stroke={activeThumb === 'ck7' ? "#5a7a8b" : "#8b5a7a"} strokeWidth="1.5"/>
+                    <ellipse cx="500" cy="150" rx={65 + (activeThumb === '10x' ? -20 : 0)} ry={48} fill={activeThumb === 'ck7' ? "#90a8b8" : "#b890a8"} stroke={activeThumb === 'ck7' ? "#4a6a7a" : "#7a4a6a"} strokeWidth="2"/>
+                    <ellipse cx="740" cy="300" rx={58} ry={44} fill={activeThumb === 'ck7' ? "#a0b8c8" : "#c8a0b8"} stroke="#8b5a7a" strokeWidth="1.5"/>
+                    {/* Nuclei */}
+                    <g fill={activeThumb === 'pas' ? "#800040" : "#3a1a4a"}>
+                      <circle cx="120" cy="110" r="5"/><circle cx="140" cy="100" r="6"/><circle cx="160" cy="120" r="5"/>
+                      <circle cx="480" cy="140" r="8"/><circle cx="510" cy="130" r="7"/><circle cx="530" cy="160" r="8"/>
+                    </g>
                   </g>
-                </g>
-                {activeThumb === 'pas' && (
-                  <path d="M0 0 L900 500 M900 0 L0 500" stroke="#ff00ff" strokeWidth="0.5" opacity="0.1" />
-                )}
-                <text x="20" y="480" fill="#8a6a7a" className="font-mono text-[10px]">{activeThumb.toUpperCase()} · Slide ID: #442-PT</text>
-              </svg>
+                  {activeThumb === 'pas' && (
+                    <path d="M0 0 L900 500 M900 0 L0 500" stroke="#ff00ff" strokeWidth="0.5" opacity="0.1" />
+                  )}
+                  <text x="20" y="480" fill="#8a6a7a" className="font-mono text-[10px]">{activeThumb.toUpperCase()} · Slide ID: #442-PT</text>
+                </svg>
 
-              {/* Reticle - only visible if zoomed or active */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 border-2 border-teal-500/20 rounded-md pointer-events-none">
-                <div className="absolute inset-0 bg-teal-500/5 backdrop-blur-[2px]" />
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-teal-500/10" />
-                <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-px bg-teal-500/10" />
-              </div>
+                {/* Reticle - only visible if zoomed or active */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 border-2 border-teal-500/20 rounded-md pointer-events-none">
+                  <div className="absolute inset-0 bg-teal-500/5 backdrop-blur-[2px]" />
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-teal-500/10" />
+                  <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-px bg-teal-500/10" />
+                </div>
 
-              {/* Metadata Overlays */}
-              <div className="absolute bottom-4 right-4 flex gap-2">
-                <span className="px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[9px] font-mono text-white/60">{activeThumb.includes('x') ? 'H&E STAIN' : activeThumb.toUpperCase()}</span>
-                <span className="px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[9px] font-mono text-white/60">{activeThumb} MAG</span>
-              </div>
-            </motion.div>
-            
-            {/* Viewport Control */}
-            <div className="absolute top-12 left-12 flex flex-col gap-2">
-              <div className="p-1 bg-[#111620]/80 backdrop-blur-xl border border-[#243044] rounded-lg flex flex-col">
-                <button 
-                  onClick={() => setZoom(prev => Math.min(prev + 0.2, 3))}
-                  className="p-2 text-[#5a7090] hover:text-white transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.5))}
-                  className="p-2 text-[#5a7090] hover:text-white transition-colors border-t border-[#243044]"
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => {setZoom(1); setActiveThumb('40x')}}
-                  className="p-2 text-[#5a7090] hover:text-white transition-colors border-t border-[#243044]"
-                >
-                  <Maximize className="w-4 h-4" />
-                </button>
+                {/* Metadata Overlays */}
+                <div className="absolute bottom-4 right-4 flex gap-2">
+                  <span className="px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[9px] font-mono text-white/60">{activeThumb.includes('x') ? 'H&E STAIN' : activeThumb.toUpperCase()}</span>
+                  <span className="px-2 py-1 bg-black/60 backdrop-blur-md rounded text-[9px] font-mono text-white/60">{activeThumb} MAG</span>
+                </div>
+              </motion.div>
+              
+              {/* Viewport Control */}
+              <div className="absolute top-12 left-12 flex flex-col gap-2">
+                <div className="p-1 bg-[#111620]/80 backdrop-blur-xl border border-[#243044] rounded-lg flex flex-col">
+                  <button 
+                    onClick={() => setZoom(prev => Math.min(prev + 0.2, 3))}
+                    className="p-2 text-[#5a7090] hover:text-white transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.5))}
+                    className="p-2 text-[#5a7090] hover:text-white transition-colors border-t border-[#243044]"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => {setZoom(1); setActiveThumb('40x')}}
+                    className="p-2 text-[#5a7090] hover:text-white transition-colors border-t border-[#243044]"
+                  >
+                    <Maximize className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Thumbnail Strip */}
-          <div className="h-[120px] bg-[#111620] border-t border-[#1e2a3a] flex items-center gap-4 px-6 overflow-x-auto no-scrollbar shrink-0">
-             <div className="text-[10px] font-mono uppercase text-[#5a7090] shrink-0">Select view:</div>
-             {thumbs.map((t) => (
-                <button 
-                  key={t.id}
-                  onClick={() => setActiveThumb(t.id)}
-                  className={`relative w-28 h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
-                    activeThumb === t.id ? 'border-teal-500 shadow-lg shadow-teal-900/20' : 'border-[#243044] hover:border-[#2d3d56]'
-                  }`}
-                >
-                  <div className={`w-full h-full flex items-center justify-center ${t.id === 'pas' ? 'bg-[#e8f0e0]' : t.id === 'ck7' ? 'bg-[#e8e0f0]' : 'bg-[#f0e0d8]'}`}>
-                    <div className="w-12 h-10 bg-[#c8a0b8]/40 rounded-full border border-black/10" />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 py-1 px-2 bg-black/70 backdrop-blur-sm text-[8px] font-mono text-white/80">
-                    {t.label}
-                  </div>
-                </button>
-             ))}
+            {/* Thumbnail Strip */}
+            <div className="h-[120px] bg-[#111620] border-t border-[#1e2a3a] flex items-center gap-4 px-6 overflow-x-auto no-scrollbar shrink-0">
+               <div className="text-[10px] font-mono uppercase text-[#5a7090] shrink-0">Select view:</div>
+               {thumbs.map((t) => (
+                  <button 
+                    key={t.id}
+                    onClick={() => setActiveThumb(t.id)}
+                    className={`relative w-28 h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                      activeThumb === t.id ? 'border-teal-500 shadow-lg shadow-teal-900/20' : 'border-[#243044] hover:border-[#2d3d56]'
+                    }`}
+                  >
+                    <div className={`w-full h-full flex items-center justify-center ${t.id === 'pas' ? 'bg-[#e8f0e0]' : t.id === 'ck7' ? 'bg-[#e8e0f0]' : 'bg-[#f0e0d8]'}`}>
+                      <div className="w-12 h-10 bg-[#c8a0b8]/40 rounded-full border border-black/10" />
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 py-1 px-2 bg-black/70 backdrop-blur-sm text-[8px] font-mono text-white/80">
+                      {t.label}
+                    </div>
+                  </button>
+               ))}
+            </div>
           </div>
-        </div>
+        </Panel>
+
+        <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+        </PanelResizeHandle>
 
         {/* Chat / Analysis Panel */}
-        <div className="w-full lg:w-[450px] flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+        <Panel 
+          defaultSize={35} 
+          minSize={25}
+          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] lg:h-auto shrink-0"
+        >
            <div className="px-6 py-6 border-b border-[#1e2a3a]">
              <h3 className="text-sm font-semibold text-white mb-1">Pathology Tutor</h3>
              <p className="text-[11px] font-mono text-[#5a7090]">H&E slide · Diagnostic analysis</p>
@@ -235,7 +266,7 @@ export default function Pathology() {
                  <motion.div 
                    initial={{ opacity: 0, y: 10 }}
                    animate={{ opacity: 1, y: 0 }}
-                   className="flex flex-col items-start"
+                   className="flex flex-col items-start home-typing-indicator"
                  >
                    <span className="text-[9px] font-mono uppercase text-[#5a7090] mb-1">Pathology Tutor</span>
                    <div className="bg-[#161d2a] p-3 rounded-2xl rounded-tl-none border border-[#1e2a3a] flex items-center gap-2">
@@ -271,8 +302,8 @@ export default function Pathology() {
                 </button>
              </div>
            </div>
-        </div>
-      </div>
+        </Panel>
+      </PanelGroup>
     </div>
   );
 }

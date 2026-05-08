@@ -6,7 +6,7 @@ let aiClient: GoogleGenAI | null = null;
 
 function getAiClient() {
   if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env.VITE_GEMINI_API_KEY;
     if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
       console.warn("GEMINI_API_KEY not found. AI features will be disabled.");
       // We still initialize to avoid null checks everywhere, but calls will fail

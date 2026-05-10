@@ -161,7 +161,7 @@ export default function RadiologyAI() {
   const [messages, setMessages] = useState<Message[]>([
     { 
       role: 'assistant', 
-      content: `Take your time reviewing this PA chest X-ray of a 58-year-old male presenting with fever, productive cough, and right-sided pleuritic chest pain for 4 days.\n\nStart by describing what you see systematically. What's your first impression of the lung fields?` 
+      content: `Welcome to the Radiology station. I see we have ${initialCase.name} loaded. \n\nBefore you start, ensure you've checked the patient metadata. Start by describing the technical quality of the image.` 
     }
   ]);
   const [input, setInput] = useState('');

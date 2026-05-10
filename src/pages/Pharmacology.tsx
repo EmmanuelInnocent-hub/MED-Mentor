@@ -146,10 +146,13 @@ export default function Pharmacology() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [input, setInput] = useState('');
+  
+  const drug = drugLibrary[activeDrugId] || drugLibrary['metformin'];
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "You're studying Metformin — the cornerstone of T2DM management. \n\nBefore we go further: can you explain *why* metformin doesn't cause hypoglycaemia on its own, even at high doses? Think about its mechanism."
+      content: `Let's discuss ${drug.name}. This ${drug.category} is fascinating. What is the most significant clinical concern you have when prescribing this to a new patient?`
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -166,8 +169,6 @@ export default function Pharmacology() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const drug = drugLibrary[activeDrugId] || drugLibrary['metformin'];
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });

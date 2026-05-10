@@ -37,7 +37,7 @@ export default function Pediatrics() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Chidera is showing signs of respiratory distress. \n\nBefore anything else — how do you assess severity in paediatric respiratory distress? What clinical signs tell you this child needs immediate intervention?"
+      content: "Welcome to the Pediatric ward. Chidera is a 2-year-old presenting with acute onset respiratory distress. Where would you like to begin your assessment?"
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);

@@ -20,13 +20,13 @@ import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
 const initialExamSteps = [
-  { id: 1, label: 'Mental status & GCS', status: 'done', penalty: null },
-  { id: 2, label: 'Cranial nerves (I–XII)', status: 'done', penalty: null },
-  { id: 3, label: 'Motor system — power & tone', status: 'active', penalty: null },
+  { id: 1, label: 'Mental status & GCS', status: 'active', penalty: null },
+  { id: 2, label: 'Cranial nerves (I–XII)', status: 'todo', penalty: null },
+  { id: 3, label: 'Motor system — power & tone', status: 'todo', penalty: null },
   { id: 4, label: 'Deep tendon reflexes', status: 'todo', penalty: null },
   { id: 5, label: 'Sensory examination', status: 'todo', penalty: null },
   { id: 6, label: 'Cerebellar function', status: 'todo', penalty: null },
-  { id: 7, label: 'Gait & stance', status: 'skipped', penalty: '-5 pts' },
+  { id: 7, label: 'Gait & stance', status: 'todo', penalty: null },
   { id: 8, label: 'Higher cortical functions', status: 'todo', penalty: null },
 ];
 
@@ -35,18 +35,14 @@ export default function Neurology() {
   const [input, setInput] = useState('');
   const [steps, setSteps] = useState(initialExamSteps);
   const [scores, setScores] = useState({
-    examOrder: 72,
-    findings: 85,
-    skipped: 1
+    examOrder: 0,
+    findings: 0,
+    skipped: 0
   });
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Good — you've identified a right facial droop, right arm drift, and dysarthric speech. The FAST screen is clearly positive. Now you need to proceed with the motor examination systematically. Test upper and lower limb power bilaterally using the MRC scale. What would you expect to find, and why?"
-    },
-    {
-      role: 'system',
-      content: "Gait assessment was skipped before proceeding — this step is required in all neuro exams. -5 points applied."
+      content: "Patient presents with suspected acute stroke. We've noted a slight facial asymmetry. How would you like to begin the neurological examination?"
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);

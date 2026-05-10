@@ -22,12 +22,12 @@ const globalRanks = [
   { rank: 3, user: 'Fatima B.', school: 'ABU · Zaria', score: 92, cases: 61, streak: 18, change: 'down', delta: 1 },
   { rank: 4, user: 'Kofi A.', school: 'KNUST · Ghana', score: 91, cases: 48, streak: 14, change: 'up', delta: 3 },
   { rank: 5, user: 'Maryam O.', school: 'UNIBEN · Benin', score: 89, cases: 52, streak: 9, change: 'flat' },
-  { rank: 14, user: 'James M. (You)', school: 'UNILAG · Lagos', score: 78, cases: 42, streak: 12, change: 'up', delta: 6, isYou: true },
+  { rank: 14, user: 'User (You)', school: 'Not provided', score: 0, cases: 0, streak: 0, change: 'flat', isYou: true },
 ];
 
 const schoolRanks = [
   { rank: 1, user: 'Chukwuemeka U.', school: 'UNILAG · Lagos', score: 97, cases: 68, streak: 30, change: 'flat' },
-  { rank: 2, user: 'James M. (You)', school: 'UNILAG · Lagos', score: 78, cases: 42, streak: 12, change: 'up', delta: 2, isYou: true },
+  { rank: 2, user: 'User (You)', school: 'Not provided', score: 0, cases: 0, streak: 0, change: 'flat', isYou: true },
   { rank: 3, user: 'Sola O.', school: 'UNILAG · Lagos', score: 75, cases: 38, streak: 5, change: 'up', delta: 1 },
   { rank: 4, user: 'Ifeanyi E.', school: 'UNILAG · Lagos', score: 72, cases: 30, streak: 8, change: 'down', delta: 1 },
 ];
@@ -89,21 +89,21 @@ export default function Leaderboard() {
 
            <div className="p-6 m-4 bg-gradient-to-br from-blue-600/20 to-blue-600/5 rounded-2xl border border-blue-500/20 transition-all hover:border-blue-500/40">
               <div className="text-[10px] font-mono uppercase tracking-widest text-blue-400 mb-6">Your position</div>
-              <div className="text-5xl font-serif text-white mb-2 leading-none italic">{filter === 'global' ? '#14' : '#2'}</div>
-              <div className="text-sm font-bold text-white mb-1">Dr. James Martin</div>
-              <div className="text-[11px] font-mono text-[#5a7090]">78% avg · 42 cases · 12🔥</div>
-              <div className="mt-4 flex items-center gap-2 text-[10px] font-mono text-green-500 font-bold">
-                 <ArrowUp className="w-3 h-3" /> ↑ {filter === 'global' ? '6' : '2'} places this week
+              <div className="text-5xl font-serif text-white mb-2 leading-none italic">{filter === 'global' ? 'N/A' : 'N/A'}</div>
+              <div className="text-sm font-bold text-white mb-1">Student Practitioner</div>
+              <div className="text-[11px] font-mono text-[#5a7090]">0% avg · 0 cases · 0🔥</div>
+              <div className="mt-4 flex items-center gap-2 text-[10px] font-mono text-slate-500 font-bold">
+                 <Minus className="w-3 h-3" /> No change this week
               </div>
            </div>
 
            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Specialty Ranks</h3>
               {[
-                { s: 'Cardiology', r: '#4', c: 'text-green-500' },
-                { s: 'Pediatrics', r: '#9', c: 'text-green-500' },
-                { s: 'Radiology', r: '#28', c: 'text-amber-500' },
-                { s: 'Neurology', r: '#118', c: 'text-rose-500' },
+                { s: 'Cardiology', r: 'N/A', c: 'text-slate-500' },
+                { s: 'Pediatrics', r: 'N/A', c: 'text-slate-500' },
+                { s: 'Radiology', r: 'N/A', c: 'text-slate-500' },
+                { s: 'Neurology', r: 'N/A', c: 'text-slate-500' },
               ].map(spec => (
                 <div key={spec.s} className="flex items-center justify-between py-2 border-b border-white/5 group cursor-pointer hover:border-white/10 transition-all">
                   <span className="text-xs text-white/50 group-hover:text-white transition-colors">{spec.s}</span>

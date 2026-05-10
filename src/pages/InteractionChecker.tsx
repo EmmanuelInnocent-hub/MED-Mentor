@@ -22,12 +22,7 @@ import {
 } from 'react-resizable-panels';
 import { checkDrugInteraction } from '../lib/gemini';
 
-const initialHistory = [
-  { drugs: 'Warfarin + Aspirin', severity: 'Major', summary: 'Additive bleeding risk — combined antiplatelet & anticoagulant effect.' },
-  { drugs: 'Metformin + Contrast', severity: 'Moderate', summary: 'Risk of lactic acidosis — hold 48h before and after contrast.' },
-  { drugs: 'Lisinopril + Spironolactone', severity: 'Moderate', summary: 'Hyperkalaemia risk — monitor K⁺ closely.' },
-  { drugs: 'SSRIs + Tramadol', severity: 'Major', summary: 'Serotonin syndrome risk — avoid combination.' },
-];
+const initialHistory: any[] = [];
 
 export default function InteractionChecker() {
   const navigate = useNavigate();

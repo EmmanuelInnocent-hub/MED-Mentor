@@ -101,7 +101,7 @@ export default function Anatomy() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Welcome to the Anatomy lab. We are currently focusing on the Cardiovascular system. I see you've highlighted the heart chambers. Trace the path of blood from the Right Atrium to the Aorta — can you name all the valves it passes through?"
+      content: `Welcome to the Anatomy lab. Explore the ${activeSystem} system by identifying the hotspots. Trace the physiological paths clearly.`
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);

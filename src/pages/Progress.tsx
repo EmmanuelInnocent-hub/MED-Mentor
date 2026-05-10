@@ -30,28 +30,28 @@ import {
 } from 'recharts';
 
 const data = [
-  { day: 'Mon', score: 65, hours: 2 },
-  { day: 'Tue', score: 72, hours: 3.5 },
-  { day: 'Wed', score: 68, hours: 2.5 },
-  { day: 'Thu', score: 85, hours: 5 },
-  { day: 'Fri', score: 78, hours: 4 },
-  { day: 'Sat', score: 90, hours: 6 },
-  { day: 'Sun', score: 82, hours: 3 },
+  { day: 'Mon', score: 0, hours: 0 },
+  { day: 'Tue', score: 0, hours: 0 },
+  { day: 'Wed', score: 0, hours: 0 },
+  { day: 'Thu', score: 0, hours: 0 },
+  { day: 'Fri', score: 0, hours: 0 },
+  { day: 'Sat', score: 0, hours: 0 },
+  { day: 'Sun', score: 0, hours: 0 },
 ];
 
 const stats = [
-  { label: 'Cases Done', val: '42', delta: '+8 this week', color: 'text-white' },
-  { label: 'Avg Score', val: '78%', delta: '↑ 4% vs last week', color: 'text-green-500' },
-  { label: 'Day Streak', val: '12', delta: 'Keep it going!', color: 'text-amber-500' },
-  { label: 'Global Rank', val: '#14', delta: '↑ 6 places', color: 'text-blue-400' },
+  { label: 'Cases Done', val: '0', delta: 'Start your first case!', color: 'text-white' },
+  { label: 'Avg Score', val: '0%', delta: '↑ 0% vs last week', color: 'text-slate-500' },
+  { label: 'Day Streak', val: '0', delta: 'Start a streak today!', color: 'text-amber-500' },
+  { label: 'Global Rank', val: 'N/A', delta: 'Complete 5 cases to rank', color: 'text-blue-400' },
 ];
 
 const specialties = [
-  { name: 'Cardiology', score: 91, icon: Heart, color: 'bg-rose-500', cases: 12 },
-  { name: 'Respiratory', score: 83, icon: Activity, color: 'bg-blue-400', cases: 8 },
-  { name: 'Neurology', score: 54, icon: Brain, color: 'bg-purple-500', cases: 6, weak: true },
-  { name: 'Pharmacology', score: 61, icon: Pill, color: 'bg-amber-500', cases: 5, weak: true },
-  { name: 'Pathology', score: 72, icon: Microscope, color: 'bg-teal-500', cases: 5 },
+  { name: 'Cardiology', score: 0, icon: Heart, color: 'bg-rose-500', cases: 0 },
+  { name: 'Respiratory', score: 0, icon: Activity, color: 'bg-blue-400', cases: 0 },
+  { name: 'Neurology', score: 0, icon: Brain, color: 'bg-purple-500', cases: 0, weak: false },
+  { name: 'Pharmacology', score: 0, icon: Pill, color: 'bg-amber-500', cases: 0, weak: false },
+  { name: 'Pathology', score: 0, icon: Microscope, color: 'bg-teal-500', cases: 0 },
 ];
 
 export default function Progress() {

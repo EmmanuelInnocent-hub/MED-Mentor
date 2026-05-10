@@ -39,7 +39,7 @@ export default function Pathology() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Good. You've correctly identified this as glandular epithelial tissue — likely from the lung or colon. Now look carefully at the glandular architecture at 40x. What specific features of the glands strike you as abnormal? Focus on the nuclear morphology and the regularity of the gland borders."
+      content: "Welcome to the Pathology station. We have a H&E stain of a tissue biopsy. What are your initial observations of the architecture at this power?"
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);

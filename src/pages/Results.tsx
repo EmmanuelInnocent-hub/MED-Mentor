@@ -21,7 +21,7 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import ReactMarkdown from 'react-markdown';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 import ProgressRing from '../components/ProgressRing';
@@ -47,11 +47,25 @@ export default function Results() {
             navigate('/');
             return;
           }
-          setResult({
+          const sessionData = {
             id: docSnap.id,
             ...data,
             completedAt: data.completedAt?.toDate?.()?.toISOString() || new Date().toISOString()
-          } as SessionResult);
+          } as SessionResult;
+          setResult(sessionData);
+
+          // Update Knowledge Progress based on all sessions
+          const resultsRef = collection(db, 'sessions'); // Sessions that are 'completed' have results
+          const q = query(resultsRef, where('userId', '==', user.uid), where('status', '==', 'completed'));
+          const resultsSnap = await getDocs(q);
+          const allResults = resultsSnap.docs.map(d => d.data());
+          
+          if (allResults.length > 0) {
+            const avgScore = allResults.reduce((acc, r) => acc + (r.score?.overall || 0), 0) / allResults.length;
+            const knowledgeProgress = Math.min(100, Math.round((allResults.length * 5) + (avgScore * 0.5)));
+            
+            await updateDoc(doc(db, 'users', user.uid), { knowledgeProgress });
+          }
         } else {
           navigate('/');
         }
@@ -134,11 +148,10 @@ export default function Results() {
             </div>
             
             <div className="mb-8 relative">
-              <ProgressRing score={result.score.overall} size={180} strokeWidth={14} color={result.score.overall >= 80 ? 'text-emerald-500' : 'text-blue-600'} />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <ProgressRing score={result.score.overall} size={180} strokeWidth={14} color={result.score.overall >= 80 ? 'text-emerald-500' : 'text-blue-600'}>
                 <span className="text-4xl font-black text-slate-900">{result.score.overall}%</span>
                 <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Total Score</span>
-              </div>
+              </ProgressRing>
             </div>
             
             <div className="grid grid-cols-2 gap-4 w-full">

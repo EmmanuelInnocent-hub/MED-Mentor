@@ -15,6 +15,11 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Panel, 
+  Group as PanelGroup, 
+  Separator as PanelResizeHandle 
+} from 'react-resizable-panels';
 import { checkDrugInteraction } from '../lib/gemini';
 
 const initialHistory = [
@@ -58,10 +63,15 @@ export default function InteractionChecker() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+      <PanelGroup orientation="horizontal" className="flex-1 overflow-hidden">
         
         {/* Sidebar - History */}
-        <div className="hidden xl:flex w-72 flex-col border-r border-[#1e2a3a] bg-[#111620]">
+        <Panel
+          defaultSize={25}
+          minSize={0}
+          maxSize={100}
+          className="hidden xl:flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
+        >
           <div className="p-6 border-b border-[#1e2a3a]">
              <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Recent Checks</h3>
           </div>
@@ -88,10 +98,14 @@ export default function InteractionChecker() {
                </motion.div>
              ))}
           </div>
-        </div>
+        </Panel>
+
+        <PanelResizeHandle className="hidden xl:block w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+        </PanelResizeHandle>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-[#0a0e14]">
+        <Panel minSize={0} maxSize={100} className="flex flex-col min-w-0 bg-[#0a0e14]">
            <div className="px-6 py-4 border-b border-[#1e2a3a] flex items-center justify-between bg-[#111620]/80 backdrop-blur-xl shrink-0">
              <div className="flex items-center gap-4">
                 <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/5 text-[#5a7090] hover:text-white rounded-lg transition-colors"><ArrowLeft className="w-4 h-4" /></button>
@@ -167,8 +181,8 @@ export default function InteractionChecker() {
                            <div className="font-serif text-2xl text-white">{drugA} <span className="text-[#5a7090] font-sans font-light italic">plus</span> {drugB}</div>
                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold border ${
                              result.severity === 'Major' || result.severity === 'Contraindicated' 
-                              ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' 
-                              : 'bg-amber-500/10 border-amber-500/20 text-amber-500'
+                               ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' 
+                               : 'bg-amber-500/10 border-amber-500/20 text-amber-500'
                            }`}>
                              {result.severity}
                            </span>
@@ -197,8 +211,8 @@ export default function InteractionChecker() {
                  </AnimatePresence>
               </div>
            </div>
-        </div>
-      </div>
+        </Panel>
+      </PanelGroup>
     </div>
   );
 }

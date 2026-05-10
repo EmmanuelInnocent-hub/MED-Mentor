@@ -18,8 +18,8 @@ function getAiClient() {
   return aiClient;
 }
 
-const MODEL_NAME = "gemini-flash-latest"; // Using the stable latest alias
-const SCORING_MODEL = "gemini-3.1-pro-preview"; // Using Pro for complex reasoning scoring
+const MODEL_NAME = "gemini-1.5-flash"; // Using stable 1.5 flash
+const SCORING_MODEL = "gemini-1.5-pro"; // Using 1.5 Pro for complex reasoning scoring
 
 export function buildSystemPrompt(caseData: Case, difficulty: string) {
   return `
@@ -196,6 +196,10 @@ ${messages.filter(m => m.role !== 'system').map(m => `${m.role.toUpperCase()}: $
 JSON Output format:
 {
   "overall": number (0-100),
+  "history": number (0-100 score for history taking skill),
+  "physical": number (0-100 score for physical exam selection),
+  "diagnosis": number (0-100 score for diagnostic reasoning),
+  "management": number (0-100 score for management/treatment plan),
   "dimensions": {
     "diagnosticAccuracy": number,
     "reasoningProcess": number,
@@ -218,6 +222,10 @@ JSON Output format:
         type: Type.OBJECT,
         properties: {
           overall: { type: Type.NUMBER },
+          history: { type: Type.NUMBER },
+          physical: { type: Type.NUMBER },
+          diagnosis: { type: Type.NUMBER },
+          management: { type: Type.NUMBER },
           dimensions: {
             type: Type.OBJECT,
             properties: {
@@ -233,7 +241,7 @@ JSON Output format:
           feedback: { type: Type.STRING },
           grade: { type: Type.STRING },
         },
-        required: ["overall", "dimensions", "strengths", "gaps", "feedback", "grade"]
+        required: ["overall", "history", "physical", "diagnosis", "management", "dimensions", "strengths", "gaps", "feedback", "grade"]
       }
     }
   });
@@ -245,6 +253,10 @@ JSON Output format:
     console.error("Scoring parse failed:", e);
     return {
       overall: 70,
+      history: 70,
+      physical: 70,
+      diagnosis: 70,
+      management: 70,
       dimensions: { diagnosticAccuracy: 70, reasoningProcess: 70, keyStepCoverage: 70, safetyAwareness: 70 },
       strengths: ["Completed simulation"],
       gaps: ["Evaluation parsing failed"],

@@ -23,7 +23,7 @@ import Progress from './pages/Progress';
 import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { Activity } from 'lucide-react';
+import MedMentorLogo from './components/MedMentorLogo';
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -32,11 +32,9 @@ function AppContent() {
   if (loading) {
     return (
       <div className="h-screen w-full bg-[#0f172a] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-16 h-16 bg-blue-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-blue-500/40 animate-bounce">
-            <Activity className="w-10 h-10 text-white" />
-          </div>
-          <div className="text-blue-400 font-black tracking-[0.3em] uppercase text-xs animate-pulse">Initializing Lab</div>
+        <div className="flex flex-col items-center gap-10">
+          <MedMentorLogo showText={false} iconSize={40} containerSize="w-24 h-24" />
+          <div className="text-blue-400 font-bold tracking-[0.4em] uppercase text-[11px] animate-pulse">Initializing Lab</div>
         </div>
       </div>
     );

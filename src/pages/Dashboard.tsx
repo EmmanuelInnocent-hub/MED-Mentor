@@ -8,13 +8,15 @@ import {
   Plus, 
   ChevronRight,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Brain
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 import { SessionResult } from '../types';
+import ProgressRing from '../components/ProgressRing';
 import RoadmapSection from '../components/RoadmapSection';
 
 export default function Dashboard() {
@@ -22,7 +24,7 @@ export default function Dashboard() {
   const { user, profile } = useAuth();
   const [sessions, setSessions] = useState<SessionResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<any>({
     completed: 0,
     avgScore: 0,
     weakArea: 'None',
@@ -35,61 +37,66 @@ export default function Dashboard() {
       
       try {
         const sessionsRef = collection(db, 'sessions');
-        let q = query(
+        const q = query(
           sessionsRef, 
           where('userId', '==', user.uid),
-          orderBy('completedAt', 'desc'),
-          limit(10)
+          orderBy('completedAt', 'desc')
         );
         
         let querySnapshot;
         try {
           querySnapshot = await getDocs(q);
-        } catch (idxError: any) {
-          // Fallback if index isn't ready: remove orderBy
-          console.warn("Firestore index not ready, using fallback query", idxError);
-          q = query(
+        } catch (idxError) {
+          const qFallback = query(
             sessionsRef, 
-            where('userId', '==', user.uid),
-            limit(10)
+            where('userId', '==', user.uid)
           );
-          querySnapshot = await getDocs(q);
+          querySnapshot = await getDocs(qFallback);
         }
         
-        const fetchedSessions = querySnapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data() 
-        })) as SessionResult[];
-        
-        setSessions(fetchedSessions);
+        const allFetchedSessions = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return { 
+            id: doc.id, 
+            ...data,
+            completedAt: data.completedAt?.toDate?.()?.toISOString() || (typeof data.completedAt === 'string' ? data.completedAt : new Date().toISOString())
+          };
+        }) as SessionResult[];
 
-        if (fetchedSessions.length > 0) {
-          const avg = Math.round(fetchedSessions.reduce((acc: number, s: SessionResult) => acc + s.score.overall, 0) / fetchedSessions.length);
+        // A session is "completed" for stats if it has a score
+        const completedSessions = allFetchedSessions.filter(s => s.score && s.score.overall !== undefined);
+        
+        setSessions(allFetchedSessions.slice(0, 5)); // Show top 5 recent ones for the summary table
+        
+        let avg = 0;
+        let worstSpecialty = 'None';
+
+        if (completedSessions.length > 0) {
+          avg = Math.round(completedSessions.reduce((acc: number, s: SessionResult) => acc + s.score.overall, 0) / completedSessions.length);
           
           const specialtyScores: Record<string, { total: number, count: number }> = {};
-          fetchedSessions.forEach((s: SessionResult) => {
+          completedSessions.forEach((s: SessionResult) => {
             if (!specialtyScores[s.specialty]) specialtyScores[s.specialty] = { total: 0, count: 0 };
             specialtyScores[s.specialty].total += s.score.overall;
             specialtyScores[s.specialty].count += 1;
           });
 
-          let worstSpecialty = 'None';
           let minAvg = 101;
           Object.entries(specialtyScores).forEach(([key, val]) => {
-            const avg = val.total / val.count;
-            if (avg < minAvg) {
-              minAvg = avg;
+            const avgScore = val.total / val.count;
+            if (avgScore < minAvg) {
+              minAvg = avgScore;
               worstSpecialty = key;
             }
           });
-
-          setStats({
-            completed: fetchedSessions.length,
-            avgScore: avg,
-            weakArea: worstSpecialty,
-            streak: 5 // Defaulting to 5 for now
-          });
         }
+
+        setStats({
+          completed: completedSessions.length,
+          avgScore: avg,
+          weakArea: worstSpecialty,
+          streak: profile?.streak || 0
+        });
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -98,7 +105,7 @@ export default function Dashboard() {
     }
 
     fetchDashboardData();
-  }, [user]);
+  }, [user, profile]);
 
   const StatCard = ({ label, value, subtext, delay, valueColor = 'text-slate-900' }: any) => (
     <motion.div
@@ -109,7 +116,7 @@ export default function Dashboard() {
     >
       <div>
         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{label}</div>
-        <div className={`text-3xl font-bold ${valueColor}`}>{value.length > 15 ? value.slice(0, 12) + '...' : value}</div>
+        <div className={`text-3xl font-bold ${valueColor}`}>{value}</div>
       </div>
       <div className="mt-2 text-[10px] font-medium text-slate-500 uppercase tracking-wide">
         {subtext}
@@ -118,19 +125,19 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 shrink-0">
+    <div className="space-y-8">
+      <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 shrink-0">
         <div className="space-y-1 text-center md:text-left">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
             Welcome back, Dr. {profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel'}
           </h1>
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm font-medium">
             You have {stats.completed} active sessions in your rotation. Review your performance.
           </p>
         </div>
         <button
           onClick={() => navigate('/case/setup')}
-          className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all active:scale-95 text-sm"
+          className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all active:scale-95 text-sm"
         >
           <Plus className="w-5 h-5" />
           Start New Clinical Case
@@ -152,10 +159,10 @@ export default function Dashboard() {
         />
         <StatCard 
           label="Focus Area" 
-          value={stats.weakArea} 
-          subtext="3 cases under 60%" 
+          value={stats.weakArea === 'None' ? 'N/A' : stats.weakArea} 
+          subtext={`${stats.completed > 0 ? "3 cases under 60%" : "Start a case"}`} 
           delay={0.3} 
-          valueColor="text-orange-500"
+          valueColor="text-orange-600"
         />
         <StatCard 
           label="Study Streak" 
@@ -165,57 +172,67 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <section className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
-            <h2 className="font-bold text-base md:text-lg">Recent Case Sessions</h2>
-            <button onClick={() => navigate('/history')} className="text-xs md:text-sm text-blue-600 font-bold hover:underline uppercase tracking-widest">View All</button>
+          <div className="p-6 md:p-8 border-b border-slate-50 flex justify-between items-center">
+            <h2 className="font-bold text-xl text-slate-800">Recent Case Sessions</h2>
+            <button 
+              onClick={() => navigate('/history')} 
+              className="text-[10px] text-blue-600 font-black hover:underline uppercase tracking-[0.2em]"
+            >
+              View All
+            </button>
           </div>
 
-          <div className="flex-1 overflow-x-auto p-0 md:p-4 custom-scrollbar">
-            <table className="w-full min-w-[600px] md:min-w-0 border-collapse">
-              <thead className="sticky top-0 bg-white">
-                <tr className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                  <th className="p-4">Case Title</th>
-                  <th className="p-4">Specialty</th>
-                  <th className="p-4 text-center">Score</th>
-                  <th className="p-4 text-center">Status</th>
-                  <th className="p-4 text-right">Actions</th>
+          <div className="flex-1 overflow-x-auto custom-scrollbar p-2 md:p-4">
+            <table className="w-full min-w-[600px] border-separate border-spacing-y-2">
+              <thead>
+                <tr className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <th className="px-6 py-3">Case Title</th>
+                  <th className="px-4 py-3">Specialty</th>
+                  <th className="px-4 py-3 text-center">Score</th>
+                  <th className="px-4 py-3 text-center">Status</th>
+                  <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody>
                 {sessions.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center text-slate-400 text-sm">No cases completed yet</td>
+                    <td colSpan={5} className="p-12 text-center text-slate-400 text-sm font-medium">No clinical simulations found.</td>
                   </tr>
                 ) : (
-                  sessions.slice(0, 5).map((session) => (
-                    <tr key={session.id} className="hover:bg-slate-50 transition-colors group">
-                      <td className="p-4">
-                        <div className="font-semibold text-slate-800">{session.caseTitle}</div>
-                        <div className="text-[10px] text-slate-400 lowercase">{new Date(session.completedAt).toLocaleDateString()}</div>
+                  sessions.map((session) => (
+                    <tr key={session.id} className="group hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{session.caseTitle}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">
+                          {isNaN(new Date(session.completedAt).getTime()) ? "recently" : new Date(session.completedAt).toLocaleDateString()}
+                        </div>
                       </td>
-                      <td className="p-4 text-sm text-slate-600">
+                      <td className="px-4 py-4 text-sm text-slate-500 font-medium tracking-tight">
                         {session.specialty}
                       </td>
-                      <td className="p-4 text-center">
-                        <span className={`inline-block text-[10px] font-bold px-2.5 py-1 rounded-lg border ${
-                          session.score.overall >= 80 ? 'bg-green-50 text-green-700 border-green-100' :
+                      <td className="px-4 py-4 text-center">
+                        <span className={`inline-block text-[10px] font-black px-3 py-1.5 rounded-lg border leading-none ${
+                          session.score.overall >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                           session.score.overall >= 60 ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
-                          'bg-red-50 text-red-700 border-red-100'
+                          'bg-rose-50 text-rose-700 border-rose-100'
                         }`}>
                           {session.score.overall}%
                         </span>
                       </td>
-                      <td className="p-4 text-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">
-                          {session.score.overall >= 80 ? 'Pass' : session.score.overall >= 60 ? 'Review Needed' : 'Failed'}
+                      <td className="px-4 py-4 text-center">
+                        <span className={`text-[9px] font-black uppercase tracking-widest ${
+                          session.score.overall >= 80 ? 'text-emerald-500' :
+                          session.score.overall >= 60 ? 'text-yellow-600' : 'text-rose-500'
+                        }`}>
+                          {session.score.overall >= 80 ? 'Passed' : session.score.overall >= 60 ? 'Review Needed' : 'Failed'}
                         </span>
                       </td>
-                      <td className="p-4 text-right">
+                      <td className="px-6 py-4 text-right">
                         <button 
                           onClick={() => navigate(`/results/${session.id}`)}
-                          className="text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:underline"
+                          className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:text-blue-800"
                         >
                           Review
                         </button>
@@ -228,23 +245,28 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <section className="bg-[#0f172a] rounded-3xl p-6 text-white flex flex-col shadow-xl shadow-slate-200">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Knowledge Gap Alert</span>
+        <section className="bg-[#0f172a] rounded-3xl p-8 text-white flex flex-col shadow-xl shadow-slate-200 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <Brain className="w-24 h-24" />
           </div>
-          <h3 className="text-xl font-bold mb-3 leading-snug">Clinical Management: ACS Protocols</h3>
-          <p className="text-slate-400 text-sm leading-relaxed mb-6">
+          
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Knowledge Gap Alert</span>
+          </div>
+          
+          <h3 className="text-2xl font-bold mb-4 leading-tight">Clinical Management: ACS Protocols</h3>
+          <p className="text-slate-400 text-sm leading-relaxed mb-8">
             You've missed ordering an EKG within 10 minutes in 2/3 cardiology cases this week. Review the Acute Coronary Syndrome door-to-data flow.
           </p>
           
-          <div className="bg-slate-800/50 border border-slate-700 p-4 rounded-2xl mb-6">
-            <div className="text-[10px] font-bold uppercase text-blue-400 mb-1">Case Recommendation</div>
-            <div className="font-semibold text-sm">Unstable Angina vs NSTEMI</div>
+          <div className="bg-white/5 border border-white/10 p-5 rounded-2xl mb-8 group hover:bg-white/10 transition-colors cursor-pointer">
+            <div className="text-[10px] font-bold uppercase text-blue-400 tracking-widest mb-1">Case Recommendation</div>
+            <div className="font-bold text-base">Unstable Angina vs NSTEMI</div>
             <div className="text-[10px] text-slate-500 mt-1 italic">Curated to improve your weak areas.</div>
           </div>
           
-          <button className="mt-auto w-full py-4 bg-slate-100 text-slate-900 font-bold rounded-2xl hover:bg-white transition-colors text-sm">
+          <button className="mt-auto w-full py-4 bg-white text-slate-900 font-bold rounded-2xl hover:bg-blue-50 transition-all text-sm shadow-xl active:scale-95">
             Refresh Knowledge
           </button>
         </section>

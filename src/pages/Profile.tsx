@@ -27,7 +27,7 @@ export default function Profile() {
   const [stats, setStats] = useState({
     casesDone: 0,
     avgScore: 0,
-    streak: 12, // Mocked for streak aesthetic
+    streak: profile?.streak || 0,
     rank: 14
   });
   const [performance, setPerformance] = useState({
@@ -45,13 +45,22 @@ export default function Profile() {
         const sessionsRef = collection(db, 'sessions');
         const q = query(sessionsRef, where('userId', '==', user.uid));
         const querySnapshot = await getDocs(q);
-        const fetchedSessions = querySnapshot.docs.map(doc => doc.data()) as SessionResult[];
+        const fetchedSessions = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            completedAt: data.completedAt?.toDate?.()?.toISOString() || (typeof data.completedAt === 'string' ? data.completedAt : new Date().toISOString())
+          };
+        }) as SessionResult[];
         
-        if (fetchedSessions.length > 0) {
-          const avg = Math.round(fetchedSessions.reduce((acc, s) => acc + s.score.overall, 0) / fetchedSessions.length);
+        const completedSessions = fetchedSessions.filter(s => s.score && s.score.overall !== undefined);
+        
+        if (completedSessions.length > 0) {
+          const avg = Math.round(completedSessions.reduce((acc, s) => acc + s.score.overall, 0) / completedSessions.length);
           
           const specialtyTotals: Record<string, { total: number, count: number }> = {};
-          fetchedSessions.forEach(s => {
+          completedSessions.forEach(s => {
             if (!specialtyTotals[s.specialty]) specialtyTotals[s.specialty] = { total: 0, count: 0 };
             specialtyTotals[s.specialty].total += s.score.overall;
             specialtyTotals[s.specialty].count += 1;
@@ -68,7 +77,7 @@ export default function Profile() {
 
           setStats(prev => ({
             ...prev,
-            casesDone: fetchedSessions.length,
+            casesDone: completedSessions.length,
             avgScore: avg
           }));
 

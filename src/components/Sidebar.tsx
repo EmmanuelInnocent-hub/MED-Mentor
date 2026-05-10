@@ -25,6 +25,8 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 
+import MedMentorLogo from './MedMentorLogo';
+
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -79,14 +81,7 @@ export default function Sidebar() {
       {/* Mobile Top Header (Toggle for Drawer) */}
       {!location.pathname.startsWith('/case/') && (
         <div className="md:hidden sticky top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <div className="font-black text-sm tracking-tight text-slate-900">
-              MED<span className="text-blue-500">MENTOR</span>
-            </div>
-          </div>
+          <MedMentorLogo iconSize={18} textSize="text-sm" />
           <button 
             onClick={() => setIsMobileOpen(true)}
             className="p-2 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors"
@@ -203,22 +198,14 @@ export default function Sidebar() {
       >
         <div className="p-4 flex flex-col h-full overflow-y-auto custom-scrollbar">
           {/* Branding */}
-          <div className="flex items-center gap-4 mb-10 px-2 mt-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-600/40 shrink-0">
-              <Activity className="w-6 h-6 text-white" />
-            </div>
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="font-black text-xl tracking-tight text-white flex items-center gap-1.5 whitespace-nowrap"
-                >
-                  MED<span className="text-blue-500 font-bold">MENTOR</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <div className="flex items-center mb-10 px-1 mt-2">
+            <MedMentorLogo 
+              showText={isExpanded} 
+              iconSize={20} 
+              containerSize="w-10 h-10"
+              textSize="text-xl text-white" 
+              className={!isExpanded ? "justify-center w-full" : ""}
+            />
           </div>
 
           {/* Navigation Sections */}

@@ -83,9 +83,47 @@ export default function Pathology() {
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
       <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
         
+        {/* Sidebar - Views/Thumbnails */}
+        {!isMobile && (
+          <>
+            <Panel 
+              defaultSize={33} 
+              minSize={0} 
+              maxSize={100}
+              className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
+            >
+              <div className="p-6 border-b border-[#1e2a3a]">
+                <h3 className="text-[10px] font-mono uppercase tracking-[0.12em] text-[#5a7090]">Slide Views</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                {thumbs.map((t) => (
+                  <button 
+                    key={t.id}
+                    onClick={() => setActiveThumb(t.id)}
+                    className={`w-full text-left p-3 rounded-xl border-2 transition-all flex flex-col gap-2 ${
+                      activeThumb === t.id ? 'bg-[#161d2a] border-teal-500 shadow-lg shadow-teal-900/20' : 'border-transparent hover:bg-[#161d2a]/50'
+                    }`}
+                  >
+                    <div className={`w-full h-16 rounded-lg overflow-hidden flex items-center justify-center ${t.id === 'pas' ? 'bg-[#e8f0e0]' : t.id === 'ck7' ? 'bg-[#e8e0f0]' : 'bg-[#f0e0d8]'}`}>
+                      <div className="w-10 h-8 bg-[#c8a0b8]/40 rounded-full border border-black/10" />
+                    </div>
+                    <div className="text-[10px] font-bold text-white px-1">
+                      {t.label}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </Panel>
+            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
+              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+            </PanelResizeHandle>
+          </>
+        )}
+
         <Panel 
-          defaultSize={isLargeScreen ? 65 : 100} 
-          minSize={40}
+          defaultSize={isMobile ? 100 : 34} 
+          minSize={0}
+          maxSize={100}
           className="flex flex-col min-w-0 bg-[#0d1008]"
         >
           {/* Top Bar */}
@@ -187,27 +225,6 @@ export default function Pathology() {
                 </div>
               </div>
             </div>
-
-            {/* Thumbnail Strip */}
-            <div className="h-[120px] bg-[#111620] border-t border-[#1e2a3a] flex items-center gap-4 px-6 overflow-x-auto no-scrollbar shrink-0">
-               <div className="text-[10px] font-mono uppercase text-[#5a7090] shrink-0">Select view:</div>
-               {thumbs.map((t) => (
-                  <button 
-                    key={t.id}
-                    onClick={() => setActiveThumb(t.id)}
-                    className={`relative w-28 h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
-                      activeThumb === t.id ? 'border-teal-500 shadow-lg shadow-teal-900/20' : 'border-[#243044] hover:border-[#2d3d56]'
-                    }`}
-                  >
-                    <div className={`w-full h-full flex items-center justify-center ${t.id === 'pas' ? 'bg-[#e8f0e0]' : t.id === 'ck7' ? 'bg-[#e8e0f0]' : 'bg-[#f0e0d8]'}`}>
-                      <div className="w-12 h-10 bg-[#c8a0b8]/40 rounded-full border border-black/10" />
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 py-1 px-2 bg-black/70 backdrop-blur-sm text-[8px] font-mono text-white/80">
-                      {t.label}
-                    </div>
-                  </button>
-               ))}
-            </div>
           </div>
         </Panel>
 
@@ -217,9 +234,10 @@ export default function Pathology() {
 
         {/* Chat / Analysis Panel */}
         <Panel 
-          defaultSize={35} 
-          minSize={25}
-          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] lg:h-auto shrink-0"
+          defaultSize={isMobile ? 100 : 33} 
+          minSize={0}
+          maxSize={100}
+          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:h-auto shrink-0"
         >
            <div className="px-6 py-6 border-b border-[#1e2a3a]">
              <h3 className="text-sm font-semibold text-white mb-1">Pathology Tutor</h3>

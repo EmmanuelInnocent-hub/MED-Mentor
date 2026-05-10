@@ -99,9 +99,9 @@ export default function Pediatrics() {
         {isLargeScreen && (
           <>
             <Panel 
-              defaultSize={20} 
-              minSize={15} 
-              maxSize={25}
+              defaultSize={33} 
+              minSize={0} 
+              maxSize={100}
               className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
             >
               <div className="p-6 border-b border-[#1e2a3a]">
@@ -165,8 +165,9 @@ export default function Pediatrics() {
 
         {/* Main Content Area */}
         <Panel 
-          defaultSize={isLargeScreen ? 45 : 60} 
-          minSize={30}
+          defaultSize={isLargeScreen ? 34 : 60} 
+          minSize={0}
+          maxSize={100}
           className="flex flex-col min-w-0 bg-[#0a0e14]"
         >
           <div className="px-6 py-4 border-b border-[#1e2a3a] flex items-center justify-between bg-[#111620]/80 backdrop-blur-xl shrink-0">
@@ -261,9 +262,9 @@ export default function Pediatrics() {
 
         {/* Chat / Attending Panel */}
         <Panel 
-          defaultSize={30} 
-          minSize={20}
-          maxSize={50}
+          defaultSize={33} 
+          minSize={0}
+          maxSize={100}
           className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] lg:h-auto shrink-0"
         >
            <div className="px-6 py-6 border-b border-[#1e2a3a]">

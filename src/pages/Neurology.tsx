@@ -125,9 +125,9 @@ export default function Neurology() {
         {!isMobile && (
           <>
             <Panel 
-              defaultSize={25} 
-              minSize={20} 
-              maxSize={40}
+              defaultSize={33} 
+              minSize={0} 
+              maxSize={100}
               className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
             >
               <div className="p-6 border-b border-[#1e2a3a]">
@@ -200,10 +200,11 @@ export default function Neurology() {
           </>
         )}
 
-        {/* Main Content Area */}
+        {/* Patient Area */}
         <Panel 
-          defaultSize={isMobile ? 100 : 75} 
-          minSize={30}
+          defaultSize={isMobile ? 100 : 34} 
+          minSize={0}
+          maxSize={100}
           className="flex flex-col min-w-0 bg-[#0a0e14]"
         >
           {/* Top Bar */}
@@ -218,105 +219,96 @@ export default function Neurology() {
               <div className="flex items-center gap-3">
                 <Brain className="w-5 h-5 text-purple-500" />
                 <h1 className="text-lg font-serif italic text-white tracking-tight">MedMentor · Neurology</h1>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/20 font-mono font-black uppercase tracking-widest hidden sm:inline-block">High Complexity</span>
-                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-mono font-black uppercase tracking-widest hidden md:inline-block">Exam in progress</span>
-                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 font-mono font-black uppercase tracking-widest">Step {steps.filter(s => s.status === 'done').length + 1} of 8</span>
-                </div>
               </div>
             </div>
           </div>
 
-          <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
-            {/* Patient Panel */}
-            <Panel 
-              defaultSize={60} 
-              minSize={30}
-              className="overflow-y-auto p-6 md:p-8 space-y-6 custom-scrollbar h-[40vh] md:h-auto"
-            >
-              <div className="space-y-4">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090] mb-3">Chief Complaint</div>
-                <div className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-5 text-[13px] leading-relaxed text-[#a8b8cc] shadow-lg shadow-amber-900/5">
-                  <strong className="text-amber-500 font-black uppercase tracking-widest mr-2">Chief Complaint:</strong> 
-                  47-year-old male, sudden onset right-sided weakness and slurred speech, 2-hour onset.
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 custom-scrollbar">
+            <div className="space-y-4">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090] mb-3">Chief Complaint</div>
+              <div className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-5 text-[13px] leading-relaxed text-[#a8b8cc] shadow-lg shadow-amber-900/5">
+                <strong className="text-amber-500 font-black uppercase tracking-widest mr-2">Chief Complaint:</strong> 
+                47-year-old male, sudden onset right-sided weakness and slurred speech, 2-hour onset.
+              </div>
+            </div>
+
+            <div className="bg-[#161d2a] border border-[#243044] rounded-xl p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 rounded-full bg-purple-500/15 border border-purple-400/30 flex items-center justify-center font-serif text-xl text-purple-400">BO</div>
+                <div>
+                  <h2 className="text-base font-semibold text-white">Benjamin O.</h2>
+                  <p className="text-[11px] font-mono text-[#5a7090]">47M · Emergency Dept · FAST+</p>
                 </div>
               </div>
-
-              <div className="bg-[#161d2a] border border-[#243044] rounded-xl p-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-full bg-purple-500/15 border border-purple-400/30 flex items-center justify-center font-serif text-xl text-purple-400">BO</div>
-                  <div>
-                    <h2 className="text-base font-semibold text-white">Benjamin O.</h2>
-                    <p className="text-[11px] font-mono text-[#5a7090]">47M · Emergency Dept · FAST+</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[
-                    { label: 'BP', val: '182/104', color: 'text-rose-500', note: 'Hypertensive emergency' },
-                    { label: 'HR', val: '88 bpm', color: 'text-[#e8edf5]', note: 'Within normal range' },
-                    { label: 'GCS', val: '13/15', color: 'text-amber-500', note: 'Reduced consciousness' },
-                    { label: 'SpO2', val: '96%', color: 'text-[#e8edf5]', note: 'Acceptable' },
-                    { label: 'Glucose', val: '7.2 mmol/L', color: 'text-[#e8edf5]', note: 'Stroke mimic ruled out' },
-                    { label: 'Temp', val: '37.0°C', color: 'text-[#e8edf5]', note: 'Afebrile' },
-                  ].map((stat) => (
-                    <div key={stat.label} className="bg-[#1c2537] p-3 rounded-lg border border-[#243044]/50 group transition-all hover:border-purple-500/30">
-                      <div className="text-[9px] font-mono uppercase tracking-widest text-[#5a7090] mb-1">{stat.label}</div>
-                      <div className={`text-sm font-black ${stat.color} mb-0.5`}>{stat.val}</div>
-                      <div className="text-[8px] text-[#5a7090]/80 font-mono italic opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                        {stat.note}
-                      </div>
+              
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                {[
+                  { label: 'BP', val: '182/104', color: 'text-rose-500', note: 'Hypertensive emergency' },
+                  { label: 'HR', val: '88 bpm', color: 'text-[#e8edf5]', note: 'Within normal range' },
+                  { label: 'GCS', val: '13/15', color: 'text-amber-500', note: 'Reduced consciousness' },
+                  { label: 'SpO2', val: '96%', color: 'text-[#e8edf5]', note: 'Acceptable' },
+                  { label: 'Glucose', val: '7.2 mmol/L', color: 'text-[#e8edf5]', note: 'Stroke mimic ruled out' },
+                  { label: 'Temp', val: '37.0°C', color: 'text-[#e8edf5]', note: 'Afebrile' },
+                ].map((stat) => (
+                  <div key={stat.label} className="bg-[#1c2537] p-3 rounded-lg border border-[#243044]/50 group transition-all hover:border-purple-500/30">
+                    <div className="text-[9px] font-mono uppercase tracking-widest text-[#5a7090] mb-1">{stat.label}</div>
+                    <div className={`text-sm font-black ${stat.color} mb-0.5`}>{stat.val}</div>
+                    <div className="text-[8px] text-[#5a7090]/80 font-mono italic opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {stat.note}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              <div className="space-y-4">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Neurological Findings So Far</div>
-                <div className="bg-[#161d2a] border border-[#243044] rounded-xl overflow-hidden">
-                  <table className="w-full text-xs text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-[#1e2a3a]">
-                        <th className="p-3 font-mono text-[#5a7090] font-medium uppercase text-[10px]">Finding</th>
-                        <th className="p-3 font-mono text-[#5a7090] font-medium uppercase text-[10px]">Side</th>
-                        <th className="p-3 font-mono text-[#5a7090] font-medium uppercase text-[10px]">Result</th>
+            <div className="space-y-4">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Neurological Findings So Far</div>
+              <div className="bg-[#161d2a] border border-[#243044] rounded-xl overflow-hidden">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#1e2a3a]">
+                      <th className="p-3 font-mono text-[#5a7090] font-medium uppercase text-[10px]">Finding</th>
+                      <th className="p-3 font-mono text-[#5a7090] font-medium uppercase text-[10px]">Side</th>
+                      <th className="p-3 font-mono text-[#5a7090] font-medium uppercase text-[10px]">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1e2a3a]/50">
+                    {[
+                      { f: 'Facial droop', s: 'Right', r: 'Positive', c: 'text-rose-500' },
+                      { f: 'Arm drift', s: 'Right', r: 'Positive', c: 'text-rose-500' },
+                      { f: 'Speech', s: '—', r: 'Dysarthric', c: 'text-rose-500' },
+                      { f: 'Pupil reflex', s: 'Bilateral', r: 'Normal', c: 'text-green-500' },
+                      { f: 'Plantar reflex', s: 'Right', r: 'Extensor/Babinski+', c: 'text-rose-500' },
+                      { f: 'Gait', s: '—', r: 'Not assessed', c: 'text-amber-500' },
+                    ].map((row, i) => (
+                      <tr key={i} className="hover:bg-white/5 transition-colors">
+                        <td className="p-3 text-[#e8edf5]">{row.f}</td>
+                        <td className="p-3 text-[#5a7090]">{row.s}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-bold ${row.c}`}>
+                            {row.r}
+                          </span>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#1e2a3a]/50">
-                      {[
-                        { f: 'Facial droop', s: 'Right', r: 'Positive', c: 'text-rose-500' },
-                        { f: 'Arm drift', s: 'Right', r: 'Positive', c: 'text-rose-500' },
-                        { f: 'Speech', s: '—', r: 'Dysarthric', c: 'text-rose-500' },
-                        { f: 'Pupil reflex', s: 'Bilateral', r: 'Normal', c: 'text-green-500' },
-                        { f: 'Plantar reflex', s: 'Right', r: 'Extensor/Babinski+', c: 'text-rose-500' },
-                        { f: 'Gait', s: '—', r: 'Not assessed', c: 'text-amber-500' },
-                      ].map((row, i) => (
-                        <tr key={i} className="hover:bg-white/5 transition-colors">
-                          <td className="p-3 text-[#e8edf5]">{row.f}</td>
-                          <td className="p-3 text-[#5a7090]">{row.s}</td>
-                          <td className="p-3">
-                            <span className={`px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-bold ${row.c}`}>
-                              {row.r}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </Panel>
+            </div>
+          </div>
+        </Panel>
 
-            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-purple-500/20 active:bg-purple-500/40 relative z-50">
-              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-            </PanelResizeHandle>
+        <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-purple-500/20 active:bg-purple-500/40 relative z-50">
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
+        </PanelResizeHandle>
 
-            {/* Chat Panel */}
-            <Panel 
-              defaultSize={40} 
-              minSize={25}
-              className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] md:h-auto shrink-0"
-            >
+        {/* Chat Panel */}
+        <Panel 
+          defaultSize={isMobile ? 100 : 33} 
+          minSize={0}
+          maxSize={100}
+          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:h-auto shrink-0"
+        >
               <div className="px-6 py-6 border-b border-[#1e2a3a]">
                 <h3 className="text-sm font-semibold text-white mb-1">Neurology Attending</h3>
                 <p className="text-[11px] font-mono text-[#5a7090]">Stroke protocol active · Exam order tracked</p>
@@ -386,8 +378,6 @@ export default function Neurology() {
                   </button>
                 </div>
               </div>
-            </Panel>
-          </PanelGroup>
         </Panel>
       </PanelGroup>
     </div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Activity, Mail, Lock, ArrowRight, Chrome, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Chrome, AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import MedMentorLogo from '../components/MedMentorLogo';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
@@ -40,6 +41,8 @@ export default function Login() {
           rank,
           email: user.email,
           createdAt: serverTimestamp(),
+          lastLoginAt: serverTimestamp(),
+          streak: 1,
           knowledgeProgress: 0
         });
       }
@@ -76,6 +79,8 @@ export default function Login() {
           rank: 'Resident',
           email: user.email,
           createdAt: serverTimestamp(),
+          lastLoginAt: serverTimestamp(),
+          streak: 1,
           knowledgeProgress: 0
         });
       }
@@ -99,12 +104,11 @@ export default function Login() {
           className="bg-slate-900 rounded-[2.5rem] p-10 text-white flex flex-col justify-between relative overflow-hidden"
         >
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-10">
-              <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-blue-500/40 shadow-2xl">
-                <Activity className="w-6 h-6 text-white" />
-              </div>
-              <span className="font-black text-xl tracking-tight">MED<span className="text-blue-500">MENTOR</span></span>
-            </div>
+            <MedMentorLogo 
+              textSize="text-2xl text-white" 
+              iconSize={24} 
+              className="mb-10" 
+            />
             
             <h1 className="text-4xl font-bold tracking-tight leading-tight mb-6">
               Refine your <span className="text-blue-400">Clinical Intuition</span> in a safe-to-fail arena.

@@ -218,9 +218,9 @@ export default function Pharmacology() {
         {isLargeScreen && (
           <>
             <Panel 
-              defaultSize={20} 
-              minSize={15} 
-              maxSize={30}
+              defaultSize={33} 
+              minSize={0} 
+              maxSize={100}
               className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
             >
               <div className="p-4">
@@ -273,8 +273,9 @@ export default function Pharmacology() {
  
         {/* Main Content Area */}
         <Panel 
-          defaultSize={isLargeScreen ? 45 : 60} 
-          minSize={30}
+          defaultSize={isLargeScreen ? 34 : 60} 
+          minSize={0}
+          maxSize={100}
           className="flex flex-col min-w-0 bg-[#0a0e14]"
         >
           {/* Top Bar */}
@@ -406,8 +407,9 @@ export default function Pharmacology() {
  
         {/* Chat / Tutor Panel */}
         <Panel 
-          defaultSize={35} 
-          minSize={25}
+          defaultSize={33} 
+          minSize={0}
+          maxSize={100}
           className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)]"
         >
            <div className="px-6 py-6 border-b border-[#1e2a3a]">

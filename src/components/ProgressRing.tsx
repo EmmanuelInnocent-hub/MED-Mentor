@@ -12,8 +12,9 @@ export default function ProgressRing({
   score, 
   size = 120, 
   strokeWidth = 10, 
-  color = 'text-blue-600' 
-}: ProgressRingProps) {
+  color = 'text-blue-600',
+  children
+}: ProgressRingProps & { children?: React.ReactNode }) {
   const radius = (size / 2) - (strokeWidth / 2);
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
@@ -48,15 +49,19 @@ export default function ProgressRing({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <motion.span 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-2xl font-bold text-slate-900"
-        >
-          {score}%
-        </motion.span>
-        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Score</span>
+        {children || (
+          <>
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-2xl font-bold text-slate-900"
+            >
+              {score}%
+            </motion.span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Score</span>
+          </>
+        )}
       </div>
     </div>
   );

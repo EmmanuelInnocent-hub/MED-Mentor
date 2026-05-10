@@ -29,6 +29,10 @@ export interface SessionResult {
   messages: Message[];
   score: {
     overall: number;
+    history: number;
+    physical: number;
+    diagnosis: number;
+    management: number;
     dimensions: ScoreDimensions;
     strengths: string[];
     gaps: string[];

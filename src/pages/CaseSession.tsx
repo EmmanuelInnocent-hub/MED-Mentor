@@ -97,6 +97,7 @@ export default function CaseSession() {
         difficulty,
         messages: messages.map(m => ({ role: m.role, content: m.content })),
         score: resultData,
+        status: 'completed',
         completedAt: serverTimestamp()
       };
 

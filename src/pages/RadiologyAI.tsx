@@ -274,9 +274,9 @@ export default function RadiologyAI() {
         {isLargeScreen && (
           <>
             <Panel 
-              defaultSize={20} 
-              minSize={15} 
-              maxSize={30}
+              defaultSize={33} 
+              minSize={0} 
+              maxSize={100}
               className="flex flex-col border-r border-white/5 bg-[#080c14]"
             >
               <div className="p-6 border-b border-white/5 flex items-center justify-between">
@@ -314,8 +314,9 @@ export default function RadiologyAI() {
 
         {/* Main Viewer area */}
         <Panel 
-          defaultSize={isLargeScreen ? 45 : 60} 
-          minSize={30}
+          defaultSize={isLargeScreen ? 34 : 60} 
+          minSize={0}
+          maxSize={100}
           className="flex flex-col min-w-0 bg-[#020408] border-b lg:border-b-0 lg:border-r border-white/5"
         >
           {/* Top Bar Navigation */}
@@ -394,92 +395,115 @@ export default function RadiologyAI() {
               className={`relative w-full h-full lg:max-w-2xl flex items-center justify-center bg-[#000] shadow-[0_0_100px_rgba(37,99,235,0.05)] border transition-all duration-300 ${activeTool !== 'viewer' ? 'border-blue-500/30' : 'border-white/5'} rounded-sm overflow-hidden`}
             >
               <svg 
-                className="w-full h-full p-4 md:p-8 transition-all duration-500" 
+                className="w-full h-full" 
                 style={{ 
                   filter: windowFilters[windowPreset],
-                  transform: `scale(${zoomLevel})`
                 }}
-                viewBox="0 0 600 700" 
+                viewBox="0 0 600 800" 
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <rect width="600" height="700" fill="#000"/>
-                <ellipse cx="300" cy="350" rx="200" ry="280" fill="none" stroke="#111" strokeWidth="2"/>
+                <rect width="600" height="800" fill="#020408"/>
                 
-                {/* Simulated Ribs & Bones */}
-                <g stroke="#222" strokeWidth="1.5" fill="none">
-                  {[200, 230, 260, 290, 320, 350].map((y, i) => (
-                    <React.Fragment key={i}>
-                      <path d={`M180 ${y} Q120 ${y+30} 100 ${y+70}`} opacity={0.6} />
-                      <path d={`M420 ${y} Q480 ${y+30} 500 ${y+70}`} opacity={0.6} />
-                    </React.Fragment>
-                  ))}
+                <g style={{ transformOrigin: 'center', transform: `scale(${zoomLevel})`, transition: 'transform 0.3s ease-out' }}>
+                  {/* Outer frame / scan circle */}
+                  <ellipse cx="300" cy="400" rx="280" ry="380" fill="none" stroke="#1a2530" strokeWidth="1" />
+                  
+                  {/* Spine */}
+                  <g fill="#1a2530" opacity="0.3">
+                    {[...Array(12)].map((_, i) => (
+                      <rect key={i} x="285" y={150 + i * 35} width="30" height="25" rx="4" />
+                    ))}
+                    <rect x="295" y="470" width="10" height="300" rx="5" />
+                  </g>
+
+                  {/* Ribs (Technical Lines) */}
+                  <g stroke="#1a2530" strokeWidth="1" fill="none" opacity="0.5">
+                    {[...Array(8)].map((_, i) => (
+                      <React.Fragment key={i}>
+                        <path d={`M270 ${180 + i * 40} Q100 ${220 + i * 45} 120 ${280 + i * 50}`} />
+                        <path d={`M330 ${180 + i * 40} Q500 ${220 + i * 45} 480 ${280 + i * 50}`} />
+                      </React.Fragment>
+                    ))}
+                  </g>
+
+                  {/* Clavicles */}
+                  <path d="M280 180 Q150 160 120 185" fill="none" stroke="#1a2530" strokeWidth="1.5" opacity="0.6" />
+                  <path d="M320 180 Q450 160 480 185" fill="none" stroke="#1a2530" strokeWidth="1.5" opacity="0.6" />
+
+                  {/* Lungs - Blue Subtle Fill */}
+                  <ellipse cx="210" cy="450" rx="100" ry="200" fill="#2563eb" fillOpacity="0.05" stroke="#2563eb" strokeWidth="1" strokeOpacity="0.2" />
+                  <ellipse cx="390" cy="450" rx="100" ry="200" fill="#2563eb" fillOpacity="0.05" stroke="#2563eb" strokeWidth="1" strokeOpacity="0.2" />
+                  
+                  {/* Heart */}
+                  <ellipse cx="330" cy="520" rx="80" ry="100" fill="#1a2530" fillOpacity="0.2" stroke="#2563eb" strokeWidth="1" strokeOpacity="0.2" />
+
+                  {/* Diaphragm Curve */}
+                  <path d="M120 720 Q300 680 480 720" fill="none" stroke="#1a2530" strokeWidth="2" opacity="0.8" />
+
+                  {/* Target Indicators from image */}
+                  <circle cx="300" cy="530" r="8" fill="none" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="2 2" className="animate-pulse" />
+                  <circle cx="300" cy="530" r="2" fill="#f59e0b" />
+
+                  <g className="cursor-pointer" onClick={() => useChip("Focal opacity in RLL")}>
+                    <circle cx="450" cy="620" r="40" fill="#10b981" fillOpacity="0.05" className="animate-pulse" />
+                    <circle cx="450" cy="620" r="25" fill="#10b981" fillOpacity="0.03" />
+                    <circle cx="450" cy="620" r="8" fill="none" stroke="#ef4444" strokeWidth="1.5" />
+                    <circle cx="450" cy="620" r="2" fill="#ef4444" />
+                  </g>
                 </g>
 
-                {/* Central Soft Tissue */}
-                <rect x="290" y="100" width="20" height="500" rx="10" fill="#111" opacity="0.5"/>
-                
-                {/* Lungs */}
-                <ellipse cx="200" cy="340" rx="90" ry="160" fill="#05080c" stroke="#111" strokeWidth="1" />
-                <ellipse cx="400" cy="340" rx="90" ry="160" fill="#05080c" stroke="#111" strokeWidth="1" />
-                
-                {/* Pathological Finding Simulation */}
-                <motion.ellipse 
-                  initial={{ opacity: 0.1 }}
-                  animate={{ opacity: 0.4 }}
-                  transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
-                  cx="420" cy="480" rx="60" ry="50" fill="#333" filter="blur(8px)"
-                />
-                
-                {/* Heart */}
-                <ellipse cx="280" cy="400" rx="70" ry="85" fill="#080c14" stroke="#111" strokeWidth="2" />
+                {/* Fixed Overlay elements (do not scale) */}
+                <text x="550" y="50" fill="#2563eb" fontSize="16" fontWeight="900" opacity="0.4" className="font-mono">R</text>
+
+                <g fill="#2563eb" fillOpacity="0.35" fontSize="10" fontWeight="bold" className="font-mono tracking-widest uppercase">
+                  <text x="40" y="50">PA CHEST - 2026-04-27 - 58M - 82KG</text>
+                  <text x="40" y="75">INST: MEDMENTOR AI LAB</text>
+                  <text x="40" y="100">ACQ: 2026-04-27 18:33</text>
+                </g>
               </svg>
 
-              {/* Annotation Markers */}
-              <div 
-                className="absolute left-[70%] top-[68%] group/pneu cursor-pointer z-20"
-                onClick={() => useChip("I've identified a focal opacity in the right lower lobe. What's the next physiological step?")}
-              >
-                <div className="w-4 h-4 rounded-full border border-red-500/50 bg-red-500/10 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                </div>
-                <div className="absolute top-1/2 left-full ml-3 -translate-y-1/2 opacity-0 lg:group-hover/pneu:opacity-100 transition-opacity whitespace-nowrap bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded text-[10px] font-mono text-red-400">
-                  Opacity — RLL (68%, 64%)
-                </div>
-              </div>
 
-              <div 
-                className="absolute left-[47%] top-[57%] group/heart cursor-pointer z-20"
-                onClick={() => useChip("The heart shadow looks slightly enlarged. Does this patient have cardiomegaly?")}
-              >
-                <div className="w-4 h-4 rounded-full border border-amber-500/50 bg-amber-500/10 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                </div>
-                <div className="absolute top-1/2 left-full ml-3 -translate-y-1/2 opacity-0 lg:group-hover/heart:opacity-100 transition-opacity whitespace-nowrap bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded text-[10px] font-mono text-amber-400">
-                  Cardiac Silhouette (44%, 55%)
-                </div>
-              </div>
+              {/* Annotation Markers (removing previous divs to use integrated SVG markers) */}
 
-              {/* Overlay Metadata */}
-              <div className="absolute top-4 md:top-6 left-4 md:left-6 font-mono text-[8px] md:text-[9px] text-slate-700 uppercase tracking-widest leading-relaxed pointer-events-none">
-                PA CHEST · 58M · 82KG<br />
-                INST: MEDMENTOR AI LAB<br />
-                ACQ: 2026-04-27 18:28
-              </div>
-            </div>
+              {/* HUD / Toolkit integration */}
+              <div className="absolute inset-x-0 bottom-0 p-6 flex items-center justify-between pointer-events-none">
+                <div className="flex gap-2 pointer-events-auto">
+                  <div className="px-3 py-1.5 bg-[#080c14]/90 border border-white/10 rounded-md shadow-2xl backdrop-blur-md">
+                    <span className="text-[10px] font-black tracking-tighter text-slate-300 font-mono">PA - Chest</span>
+                  </div>
+                  <div className="px-3 py-1.5 bg-[#080c14]/90 border border-white/10 rounded-md shadow-2xl backdrop-blur-md">
+                    <span className="text-[10px] font-black tracking-tighter text-slate-300 font-mono">{windowLabels[windowPreset]}</span>
+                  </div>
+                  <div className="px-3 py-1.5 bg-[#080c14]/90 border border-white/10 rounded-md shadow-2xl backdrop-blur-md">
+                    <span className="text-[10px] font-black tracking-tighter text-slate-300 font-mono uppercase">MAG: {zoomLevel.toFixed(1)}x</span>
+                  </div>
+                </div>
 
-            {/* Viewer HUD */}
-            <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 flex gap-2 md:gap-4 flex-wrap z-30">
-              <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-1.5 md:py-2 bg-black/40 backdrop-blur-md border border-white/5 rounded-lg shrink-0">
-                <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                <span className="text-[9px] md:text-[10px] font-mono text-slate-400 tracking-tighter uppercase">{windowLabels[windowPreset]}</span>
-              </div>
-              <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-1.5 md:py-2 bg-black/40 backdrop-blur-md border border-white/5 rounded-lg shrink-0">
-                <Maximize className="w-3 h-3 text-slate-500" />
-                <span className="text-[9px] md:text-[10px] font-mono text-slate-400 tracking-tighter uppercase">MAG: {zoomLevel.toFixed(1)}X</span>
+                <div className="flex gap-1.5 pointer-events-auto">
+                  <button 
+                    onClick={() => setZoomLevel(prev => Math.min(prev + 0.5, 5))}
+                    className="w-10 h-8 flex items-center justify-center bg-[#080c14]/90 border border-white/10 rounded-md hover:bg-white/5 text-slate-300 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.5))}
+                    className="w-10 h-8 flex items-center justify-center bg-[#080c14]/90 border border-white/10 rounded-md hover:bg-white/5 text-slate-300 transition-colors"
+                  >
+                    <div className="w-3 h-0.5 bg-slate-300" />
+                  </button>
+                  <button 
+                    onClick={() => setZoomLevel(1.0)}
+                    className="px-3 h-8 flex items-center justify-center bg-[#080c14]/90 border border-white/10 rounded-md hover:bg-white/5 text-[10px] font-black text-slate-300 transition-colors font-mono"
+                  >
+                    1:1
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </Panel>
+
 
         <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-blue-500/20 active:bg-blue-500/40 relative z-50">
           <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
@@ -487,8 +511,9 @@ export default function RadiologyAI() {
 
         {/* Chat / AI Analysis Panel */}
         <Panel 
-          defaultSize={35} 
-          minSize={25}
+          defaultSize={33} 
+          minSize={0}
+          maxSize={100}
           className="flex flex-col bg-[#05080c] lg:bg-[#080c14] border-t lg:border-t-0 border-white/5 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] lg:h-auto shrink-0"
         >
           <div className="px-6 py-4 md:py-6 border-b border-white/5 shrink-0">

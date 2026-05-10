@@ -22,17 +22,17 @@ service cloud.firestore {
           && data.firstName is string && data.firstName.size() <= 100
           && data.rank in ['Student', 'Resident', 'Attending']
           && data.email is string && data.email.size() <= 255
-          && data.createdAt == request.time
-          && (data.get('knowledgeProgress', 0) is number);
+          && (data.createdAt == request.time || data.createdAt == existing().createdAt)
+          && (data.get('knowledgeProgress', 0) is number)
+          && (data.get('streak', 0) is number)
+          && (data.get('lastLoginAt', request.time) is timestamp);
       }
 
       allow get: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) 
-                    && incoming().diff(existing()).affectedKeys().hasOnly(['firstName', 'rank', 'knowledgeProgress'])
-                    && incoming().firstName is string && incoming().firstName.size() <= 100
-                    && incoming().rank in ['Student', 'Resident', 'Attending']
-                    && incoming().knowledgeProgress is number;
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['firstName', 'rank', 'knowledgeProgress', 'streak', 'lastLoginAt'])
+                    && isValidUser(incoming());
     }
 
     // 2. Simulation Sessions

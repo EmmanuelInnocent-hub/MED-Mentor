@@ -13,11 +13,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Panel, 
-  Group as PanelGroup, 
-  Separator as PanelResizeHandle 
-} from 'react-resizable-panels';
 import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
@@ -163,17 +158,12 @@ export default function Anatomy() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         
         {/* Sidebar - Systems */}
         {isLargeScreen && (
-          <>
-            <Panel 
-              defaultSize={33} 
-              minSize={0} 
-              maxSize={100}
-              className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
-            >
+          <aside className="w-72 flex flex-col border-r border-[#1e2a3a] bg-[#111620] shrink-0 overflow-hidden">
+
               <div className="p-6 border-b border-[#1e2a3a]">
                  <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Body Systems</h3>
               </div>
@@ -193,21 +183,12 @@ export default function Anatomy() {
                   </button>
                 ))}
               </div>
-            </Panel>
-
-            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
-              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-            </PanelResizeHandle>
-          </>
+          </aside>
         )}
-
+ 
         {/* Main Viewer Area */}
-        <Panel 
-          defaultSize={isLargeScreen ? 34 : 60} 
-          minSize={0}
-          maxSize={100}
-          className="flex flex-col min-w-0 bg-gradient-to-br from-[#0d1a20] to-[#050a0e] relative"
-        >
+        <section className="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-[#0d1a20] to-[#050a0e] border-r border-[#1e2a3a] overflow-hidden relative">
+
           {/* Top Bar */}
           <div className="absolute top-0 left-0 right-0 px-6 py-4 border-b border-[#1e2a3a]/30 flex items-center justify-between bg-[#111620]/40 backdrop-blur-xl z-10">
              <div className="flex items-center gap-4">
@@ -267,19 +248,12 @@ export default function Anatomy() {
               )}
              </AnimatePresence>
           </div>
-        </Panel>
-
-        <PanelResizeHandle className="hidden lg:block w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
-          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-        </PanelResizeHandle>
+        </section>
 
         {/* Tutor Panel */}
-        <Panel 
-          defaultSize={33} 
-          minSize={0}
-          maxSize={100}
-          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)]"
-        >
+        {isLargeScreen && (
+          <aside className="w-[400px] flex flex-col bg-[#111620] shrink-0 border-l border-[#1e2a3a] overflow-hidden shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+
            <div className="px-6 py-6 border-b border-[#1e2a3a] shrink-0">
              <h3 className="text-sm font-semibold text-white mb-1">Anatomy Tutor</h3>
              <p className="text-[11px] font-mono text-[#5a7090] uppercase tracking-wider">{activeSystem} LAB ACTIVE</p>
@@ -346,8 +320,9 @@ export default function Anatomy() {
                 </button>
               </div>
            </div>
-        </Panel>
-      </PanelGroup>
+        </aside>
+        )}
+      </div>
     </div>
   );
 }

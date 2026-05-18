@@ -30,6 +30,7 @@ import MedMentorLogo from './MedMentorLogo';
 export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
@@ -37,6 +38,13 @@ export default function Sidebar() {
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
+  };
+
+  const toggleSection = (title: string) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
   };
 
   const navSections = [
@@ -190,13 +198,13 @@ export default function Sidebar() {
         )}
       </AnimatePresence>
 
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar (Now Global) */}
       <motion.aside
         initial={false}
-        animate={{ width: isExpanded ? 260 : 88 }}
-        className="hidden md:flex h-screen bg-[#0f172a] text-slate-300 flex-col shrink-0 border-r border-slate-800 transition-all duration-500 ease-in-out relative z-50 overflow-hidden"
+        animate={{ width: isExpanded ? 240 : 72 }}
+        className="hidden md:flex h-full bg-[#0a0e14] text-slate-300 flex-col shrink-0 border-r border-slate-800 transition-all duration-300 ease-in-out relative z-50 overflow-hidden"
       >
-        <div className="p-4 flex flex-col h-full overflow-y-auto custom-scrollbar">
+        <div className="p-4 flex flex-col h-full overflow-y-auto no-scrollbar">
           {/* Branding */}
           <div className="flex items-center mb-10 px-1 mt-2">
             <MedMentorLogo 
@@ -213,49 +221,60 @@ export default function Sidebar() {
             {navSections.map((section) => (
               <div key={section.title} className="space-y-2">
                 {isExpanded && (
-                  <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 pb-1">
-                    {section.title}
-                  </h3>
-                )}
-                <nav className="space-y-1">
-                  {section.items.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      className={({ isActive }) =>
-                        `flex items-center gap-4 p-3 rounded-xl transition-all group relative ${
-                          isActive 
-                            ? 'bg-blue-600/10 text-blue-400 font-bold border border-blue-500/20' 
-                            : 'hover:bg-slate-800/50 text-slate-500 hover:text-slate-300 border border-transparent'
-                        }`
-                      }
+                  <button 
+                    onClick={() => toggleSection(section.title)}
+                    className="w-full flex items-center justify-between px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 pb-1 hover:text-slate-400 transition-colors group"
+                  >
+                    <span>{section.title}</span>
+                    <motion.div
+                      animate={{ rotate: collapsedSections[section.title] ? -90 : 0 }}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <item.icon className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div 
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            className="flex items-center justify-between flex-1 min-w-0"
-                          >
-                            <span className="text-xs tracking-wide truncate">{item.label}</span>
-                            {item.badge && (
-                              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md ${badgeStyles[item.badgeType || 'new']}`}>
-                                {item.badge}
-                              </span>
-                            )}
-                          </motion.div>
+                      <ChevronLeft className="w-3 h-3" />
+                    </motion.div>
+                  </button>
+                )}
+                {!collapsedSections[section.title] && (
+                  <nav className="space-y-1">
+                    {section.items.map((item) => (
+                      <NavLink
+                        key={item.path}
+                        to={item.path}
+                        className={({ isActive }) =>
+                          `flex items-center gap-4 p-3 rounded-xl transition-all group relative ${
+                            isActive 
+                              ? 'bg-blue-600/10 text-blue-400 font-bold border border-blue-500/20' 
+                              : 'hover:bg-slate-800/50 text-slate-500 hover:text-slate-300 border border-transparent'
+                          }`
+                        }
+                      >
+                        <item.icon className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div 
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -10 }}
+                              className="flex items-center justify-between flex-1 min-w-0"
+                            >
+                              <span className="text-xs tracking-wide truncate">{item.label}</span>
+                              {item.badge && (
+                                <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md ${badgeStyles[item.badgeType || 'new']}`}>
+                                  {item.badge}
+                                </span>
+                              )}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        {!isExpanded && (
+                          <div className="absolute left-16 bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all translate-x-2 group-hover:translate-x-0 shadow-2xl z-50">
+                            {item.label}
+                          </div>
                         )}
-                      </AnimatePresence>
-                      {!isExpanded && (
-                        <div className="absolute left-16 bg-slate-900 border border-slate-700 text-white px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all translate-x-2 group-hover:translate-x-0 shadow-2xl z-50">
-                          {item.label}
-                        </div>
-                      )}
-                    </NavLink>
-                  ))}
-                </nav>
+                      </NavLink>
+                    ))}
+                  </nav>
+                )}
               </div>
             ))}
           </div>
@@ -297,8 +316,8 @@ export default function Sidebar() {
                   </div>
                   <div className="h-1.5 w-full bg-slate-900/50 rounded-full overflow-hidden border border-slate-800">
                     <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${profile?.knowledgeProgress || 0}%` }}
+                      initial={{ width: 0 }} 
+                      animate={{ width: `${profile?.knowledgeProgress || 0}%` }} 
                       className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full" 
                     />
                   </div>
@@ -314,6 +333,7 @@ export default function Sidebar() {
           </div>
         </div>
       </motion.aside>
+
 
       {/* Mobile Navigation Bar */}
       {!location.pathname.startsWith('/case/') && !['/radiology', '/neurology', '/pathology', '/pharmacology', '/anatomy', '/pediatrics', '/tools/drug-checker', '/tools/progress', '/tools/leaderboard'].includes(location.pathname) && (

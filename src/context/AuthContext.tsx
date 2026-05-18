@@ -8,6 +8,7 @@ interface AuthContextType {
   profile: any | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  updateProfile: (data: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -87,8 +88,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await auth.signOut();
   };
 
+  const updateProfile = async (data: any) => {
+    if (!user) return;
+    try {
+      await setDoc(doc(db, 'users', user.uid), data, { merge: true });
+      const updatedProfile = { ...profile, ...data };
+      setProfile(updatedProfile);
+    } catch (error) {
+      handleFirestoreError(error, 'write' as any, `users/${user.uid}`);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut: signOutUser }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut: signOutUser, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

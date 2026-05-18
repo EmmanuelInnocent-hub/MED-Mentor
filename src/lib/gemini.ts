@@ -6,10 +6,10 @@ let aiClient: GoogleGenAI | null = null;
 
 function getAiClient() {
   if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env.VITE_GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
       console.warn("GEMINI_API_KEY not found. AI features will be disabled.");
-      // We still initialize to avoid null checks everywhere, but calls will fail
+      // We still initialize with a dummy key to avoid null checks, but calls will fail
       aiClient = new GoogleGenAI({ apiKey: "MISSING_KEY" });
     } else {
       aiClient = new GoogleGenAI({ apiKey });
@@ -18,8 +18,8 @@ function getAiClient() {
   return aiClient;
 }
 
-const MODEL_NAME = "gemini-1.5-flash"; // Using stable 1.5 flash
-const SCORING_MODEL = "gemini-1.5-pro"; // Using 1.5 Pro for complex reasoning scoring
+const MODEL_NAME = "gemini-3-flash-preview"; 
+const SCORING_MODEL = "gemini-3.1-pro-preview"; 
 
 export function buildSystemPrompt(caseData: Case, difficulty: string) {
   return `

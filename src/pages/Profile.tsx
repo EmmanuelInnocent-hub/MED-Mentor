@@ -12,9 +12,16 @@ import {
   Check,
   ChevronRight,
   Loader2,
-  LogOut
+  LogOut,
+  X,
+  User,
+  Briefcase,
+  Building,
+  Save,
+  Globe,
+  Upload
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -23,7 +30,7 @@ import { SessionResult } from '../types';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, updateProfile } = useAuth();
   const [stats, setStats] = useState({
     casesDone: 0,
     avgScore: 0,
@@ -37,6 +44,66 @@ export default function Profile() {
     worstScore: 54
   });
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+
+  // Form State
+  const [formData, setFormData] = useState({
+    firstName: profile?.firstName || '',
+    lastName: profile?.lastName || '',
+    title: profile?.title || 'Dr.',
+    role: profile?.rank || 'RESIDENT',
+    institution: profile?.institution || 'Global Clinic',
+    specialization: profile?.specialization || '',
+    bio: profile?.bio || ''
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        title: profile.title || 'Dr.',
+        role: profile.rank || 'RESIDENT',
+        institution: profile.institution || 'Global Clinic',
+        specialization: profile.specialization || '',
+        bio: profile.bio || ''
+      });
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        title: formData.title,
+        rank: formData.role,
+        institution: formData.institution,
+        specialization: formData.specialization,
+        bio: formData.bio
+      });
+      setToastMsg('Registry updated successfully');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error saving registry:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getInitials = () => {
+    const first = formData.firstName.trim();
+    const last = formData.lastName.trim();
+    if (first && last) return (first[0] + last[0]).toUpperCase();
+    if (first) return first.slice(0, 2).toUpperCase();
+    return 'EM';
+  };
 
   useEffect(() => {
     async function fetchStats() {
@@ -165,7 +232,10 @@ export default function Profile() {
             </div>
 
             <div className="flex flex-col items-center lg:items-end justify-center gap-4">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20 active:scale-95 w-full sm:w-auto">
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20 active:scale-95 w-full sm:w-auto"
+              >
                 Modify Registry
               </button>
             </div>
@@ -275,6 +345,206 @@ export default function Profile() {
           </section>
         </div>
       </motion.div>
+
+      {/* Modify Registry Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90dvh]"
+            >
+              {/* Modal Header */}
+              <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <h3 className="text-lg font-display font-black text-slate-900">Modify Registry</h3>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-900 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+                {/* Avatar Section */}
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-2xl font-display font-black text-white shrink-0 shadow-xl">
+                    {getInitials()}
+                  </div>
+                  <div>
+                    <button className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-2 mb-1">
+                      <Upload className="w-3 h-3" />
+                      Upload Photo
+                    </button>
+                    <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">JPG, PNG, GIF · MAX 2MB</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-slate-400 pb-2 border-b border-slate-50 flex items-center gap-2">
+                    <User className="w-3 h-3" />
+                    Personal Identity
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">First Name</label>
+                      <input 
+                        type="text" 
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Last Name</label>
+                      <input 
+                        type="text" 
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Title / Prefix</label>
+                    <select 
+                      value={formData.title}
+                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
+                    >
+                      <option value="Dr.">Dr.</option>
+                      <option value="Prof.">Prof.</option>
+                      <option value="Mr.">Mr.</option>
+                      <option value="Ms.">Ms.</option>
+                      <option value="">None</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-slate-400 pb-2 border-b border-slate-50 flex items-center gap-2">
+                    <Building className="w-3 h-3" />
+                    Institutional Registry
+                  </h4>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Current Role</label>
+                    <select 
+                      value={formData.role}
+                      onChange={(e) => setFormData({...formData, role: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
+                    >
+                      <option value="RESIDENT">Resident</option>
+                      <option value="INTERN">Intern</option>
+                      <option value="FELLOW">Fellow</option>
+                      <option value="ATTENDING">Attending</option>
+                      <option value="STUDENT">Medical Student</option>
+                      <option value="CONSULTANT">Consultant</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Institution</label>
+                    <div className="relative">
+                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input 
+                        type="text" 
+                        value={formData.institution}
+                        onChange={(e) => setFormData({...formData, institution: e.target.value})}
+                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        placeholder="e.g. Lagos University Teaching Hospital"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Specialization</label>
+                    <div className="relative">
+                      <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <select 
+                        value={formData.specialization}
+                        onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
+                      >
+                        <option value="">Not specified</option>
+                        <option value="General Medicine">General Medicine</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Radiology">Radiology</option>
+                        <option value="Paediatrics">Paediatrics</option>
+                        <option value="Surgery">Surgery</option>
+                        <option value="Emergency Medicine">Emergency Medicine</option>
+                        <option value="Pathology">Pathology</option>
+                        <option value="Pharmacology">Pharmacology</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Clinical Bio</label>
+                    <textarea 
+                      value={formData.bio}
+                      onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all h-24 resize-none"
+                      placeholder="e.g. Final-year resident focused on emergency radiology..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-8 border-t border-slate-100 flex items-center justify-between gap-4 shrink-0">
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20 flex items-center gap-2"
+                >
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  Save Registry
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] bg-emerald-500 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-white/20"
+          >
+            <Check className="w-5 h-5" />
+            <span className="text-xs font-black uppercase tracking-widest">{toastMsg}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -13,11 +13,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Panel, 
-  Group as PanelGroup, 
-  Separator as PanelResizeHandle 
-} from 'react-resizable-panels';
 import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
@@ -93,18 +88,13 @@ export default function Pediatrics() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         
         {/* Sidebar - Age Groups & Calc */}
         {isLargeScreen && (
-          <>
-            <Panel 
-              defaultSize={33} 
-              minSize={0} 
-              maxSize={100}
-              className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
-            >
-              <div className="p-6 border-b border-[#1e2a3a]">
+          <aside className="w-72 flex flex-col border-r border-[#1e2a3a] bg-[#111620] shrink-0 overflow-hidden">
+          <div className="p-6 border-b border-[#1e2a3a]">
+
                  <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Age Groups</h3>
               </div>
               <div className="flex-1 overflow-y-auto space-y-px custom-scrollbar">
@@ -156,20 +146,12 @@ export default function Pediatrics() {
                    </div>
                  </div>
               </div>
-            </Panel>
-            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-pink-500/20 active:bg-pink-500/40 relative z-50">
-              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-            </PanelResizeHandle>
-          </>
+          </aside>
         )}
-
+ 
         {/* Main Content Area */}
-        <Panel 
-          defaultSize={isLargeScreen ? 34 : 60} 
-          minSize={0}
-          maxSize={100}
-          className="flex flex-col min-w-0 bg-[#0a0e14]"
-        >
+        <section className="flex-1 flex flex-col min-w-0 bg-[#0a0e14] border-r border-[#1e2a3a] overflow-hidden">
+
           <div className="px-6 py-4 border-b border-[#1e2a3a] flex items-center justify-between bg-[#111620]/80 backdrop-blur-xl shrink-0">
             <div className="flex items-center gap-4">
               <button 
@@ -254,19 +236,13 @@ export default function Pediatrics() {
                 </div>
              </motion.div>
           </div>
-        </Panel>
-
-        <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-pink-500/20 active:bg-pink-500/40 relative z-50">
-          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-        </PanelResizeHandle>
+        </section>
 
         {/* Chat / Attending Panel */}
-        <Panel 
-          defaultSize={33} 
-          minSize={0}
-          maxSize={100}
-          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] h-[40vh] lg:h-auto shrink-0"
-        >
+        {isLargeScreen && (
+          <aside className="w-[400px] flex flex-col bg-[#111620] shrink-0 border-l border-[#1e2a3a] overflow-hidden shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+
+          <div className="h-full flex flex-col">
            <div className="px-6 py-6 border-b border-[#1e2a3a]">
              <h3 className="text-sm font-semibold text-white mb-1">Paeds Attending</h3>
              <p className="text-[11px] font-mono text-[#5a7090]">Active clinical case · Socratic tutor</p>
@@ -333,8 +309,10 @@ export default function Pediatrics() {
                 </button>
              </div>
            </div>
-        </Panel>
-      </PanelGroup>
+          </div>
+        </aside>
+        )}
+      </div>
     </div>
   );
 }

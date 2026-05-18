@@ -15,11 +15,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Panel, 
-  Group as PanelGroup, 
-  Separator as PanelResizeHandle 
-} from 'react-resizable-panels';
 import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
@@ -147,7 +142,14 @@ export default function Pharmacology() {
   const [showExplanation, setShowExplanation] = useState(false);
   const [input, setInput] = useState('');
   
+  const [drugs, setDrugs] = useState(drugListSummary);
+  const [isEditingRegistry, setIsEditingRegistry] = useState(false);
+  
   const drug = drugLibrary[activeDrugId] || drugLibrary['metformin'];
+
+  const handleUpdateDrugName = (id: string, newName: string) => {
+    setDrugs(prev => prev.map(d => d.id === id ? { ...d, name: newName } : d));
+  };
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -213,17 +215,12 @@ export default function Pharmacology() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         
         {/* Sidebar - Drug Library */}
         {isLargeScreen && (
-          <>
-            <Panel 
-              defaultSize={33} 
-              minSize={0} 
-              maxSize={100}
-              className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
-            >
+          <aside className="w-72 flex flex-col border-r border-[#1e2a3a] bg-[#111620] shrink-0 overflow-hidden">
+
               <div className="p-4">
                  <div className="bg-[#161d2a] border border-[#243044] rounded-lg px-3 py-2 flex items-center gap-2">
                    <Search className="w-3.5 h-3.5 text-[#5a7090]" />
@@ -239,46 +236,79 @@ export default function Pharmacology() {
                 <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#5a7090]">Drug Library</h3>
               </div>
               <div className="flex-1 overflow-y-auto px-2 space-y-1 custom-scrollbar">
-                {filteredDrugs.map((d) => (
-                  <button 
-                    key={d.id}
-                    onClick={() => setActiveDrugId(d.id)}
-                    className={`w-full text-left p-3.5 rounded-lg border-l-2 transition-all ${
-                      activeDrugId === d.id ? 'bg-[#161d2a] border-amber-600' : 'border-transparent hover:bg-[#161d2a]/50'
-                    }`}
-                  >
-                    <div className="text-sm font-semibold text-white mb-1">{d.name}</div>
-                    <div className="text-[10px] font-mono text-[#a8b8cc] mb-2">{d.class}</div>
-                    <div className="flex flex-wrap gap-1">
-                      {d.tags.map(t => (
-                        <span key={t} className="text-[8px] font-mono font-bold px-2 py-0.5 rounded-md bg-[#1c2537] text-[#5a7090]">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-3 h-[2px] bg-[#243044] rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${d.color === 'green' ? 'bg-green-500' : d.color === 'amber' ? 'bg-amber-500' : 'bg-blue-500'}`} 
-                        style={{ width: `${d.score}%` }} 
-                      />
-                    </div>
-                  </button>
+                {drugs.filter(d => 
+                  d.name.toLowerCase().includes(search.toLowerCase()) || 
+                  d.class.toLowerCase().includes(search.toLowerCase())
+                ).map((d) => (
+                  <div key={d.id} className="relative group">
+                    <button 
+                      onClick={() => !isEditingRegistry && setActiveDrugId(d.id)}
+                      className={`w-full text-left p-3.5 rounded-lg border-l-2 transition-all ${
+                        activeDrugId === d.id ? 'bg-[#161d2a] border-amber-600' : 'border-transparent hover:bg-[#161d2a]/50'
+                      } ${isEditingRegistry ? 'cursor-default' : ''}`}
+                    >
+                      {isEditingRegistry ? (
+                        <div className="space-y-2">
+                          <input 
+                            type="text"
+                            value={d.name}
+                            onChange={(e) => handleUpdateDrugName(d.id, e.target.value)}
+                            className="w-full bg-[#0a0e14] border border-amber-500/30 rounded px-2 py-1 text-sm text-white outline-none focus:border-amber-500 transition-all font-serif italic"
+                            autoFocus={activeDrugId === d.id}
+                          />
+                          <div className="text-[10px] font-mono text-[#5a7090] px-2">Editing Drug Identity</div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="text-sm font-semibold text-white mb-1">{d.name}</div>
+                          <div className="text-[10px] font-mono text-[#a8b8cc] mb-2">{d.class}</div>
+                        </>
+                      )}
+                      
+                      <div className="flex flex-wrap gap-1">
+                        {d.tags.map(t => (
+                          <span key={t} className="text-[8px] font-mono font-bold px-2 py-0.5 rounded-md bg-[#1c2537] text-[#5a7090]">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-3 h-[2px] bg-[#243044] rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${d.color === 'green' ? 'bg-green-500' : d.color === 'amber' ? 'bg-amber-500' : 'bg-blue-500'}`} 
+                          style={{ width: `${d.score}%` }} 
+                        />
+                      </div>
+                    </button>
+                  </div>
                 ))}
               </div>
-            </Panel>
-            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-amber-500/20 active:bg-amber-500/40 relative z-50">
-              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-            </PanelResizeHandle>
-          </>
+              
+              {/* Modify Registry Button */}
+              <div className="p-4 border-t border-[#1e2a3a] mt-auto">
+                <button 
+                  onClick={() => setIsEditingRegistry(!isEditingRegistry)}
+                  className={`w-full py-3 px-4 rounded-full text-[11px] font-black tracking-widest uppercase transition-all shadow-lg flex items-center justify-center gap-2 ${
+                    isEditingRegistry 
+                      ? 'bg-green-600 hover:bg-green-500 text-white shadow-green-900/20' 
+                      : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/20'
+                  }`}
+                >
+                  {isEditingRegistry ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      SAVE REGISTRY
+                    </>
+                  ) : (
+                    'MODIFY REGISTRY'
+                  )}
+                </button>
+              </div>
+          </aside>
         )}
  
         {/* Main Content Area */}
-        <Panel 
-          defaultSize={isLargeScreen ? 34 : 60} 
-          minSize={0}
-          maxSize={100}
-          className="flex flex-col min-w-0 bg-[#0a0e14]"
-        >
+        <section className="flex-1 flex flex-col min-w-0 bg-[#0a0e14] border-r border-[#1e2a3a] overflow-hidden">
+
           {/* Top Bar */}
           <div className="px-6 py-4 border-b border-[#1e2a3a] flex items-center justify-between bg-[#111620]/80 backdrop-blur-xl shrink-0">
             <div className="flex items-center gap-4">
@@ -308,8 +338,12 @@ export default function Pharmacology() {
                
                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
                  <div>
-                   <h2 className="text-3xl font-serif text-white leading-none">{drug.name}</h2>
-                   <p className="text-xs font-mono text-[#5a7090] mt-2 italic">{drug.name.toLowerCase()} · {drug.brand}</p>
+                   <h2 className="text-3xl font-serif text-white leading-none">
+                     {drugs.find(d => d.id === activeDrugId)?.name || drug.name}
+                   </h2>
+                   <p className="text-xs font-mono text-[#5a7090] mt-2 italic">
+                     {(drugs.find(d => d.id === activeDrugId)?.name || drug.name).toLowerCase()} · {drug.brand}
+                   </p>
                  </div>
                  <span className="self-start px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-mono font-bold rounded-full">{drug.category}</span>
                </div>
@@ -400,22 +434,17 @@ export default function Pharmacology() {
                </AnimatePresence>
             </div>
           </div>
-        </Panel>
- 
-        <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-amber-500/20 active:bg-amber-500/40 relative z-50">
-          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-        </PanelResizeHandle>
+        </section>
  
         {/* Chat / Tutor Panel */}
-        <Panel 
-          defaultSize={33} 
-          minSize={0}
-          maxSize={100}
-          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)]"
-        >
+        {isLargeScreen && (
+          <aside className="w-[400px] flex flex-col bg-[#111620] shrink-0 border-l border-[#1e2a3a] overflow-hidden shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+
            <div className="px-6 py-6 border-b border-[#1e2a3a]">
              <h3 className="text-sm font-semibold text-white mb-1">Pharmacology Tutor</h3>
-             <p className="text-[11px] font-mono text-[#5a7090]">{drug.name} module · Socratic mode</p>
+             <p className="text-[11px] font-mono text-[#5a7090]">
+               {drugs.find(d => d.id === activeDrugId)?.name || drug.name} module · Socratic mode
+             </p>
            </div>
            
            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[#0a0e14]">
@@ -479,8 +508,9 @@ export default function Pharmacology() {
                 </button>
              </div>
            </div>
-        </Panel>
-      </PanelGroup>
+        </aside>
+        )}
+      </div>
     </div>
   );
 }

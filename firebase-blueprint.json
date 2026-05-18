@@ -7,7 +7,12 @@
       "properties": {
         "uid": { "type": "string", "description": "The unique identifier for the user." },
         "firstName": { "type": "string", "description": "User's first name." },
-        "rank": { "type": "string", "enum": ["Student", "Resident", "Attending"], "description": "Medical professional rank." },
+        "lastName": { "type": "string", "description": "User's last name." },
+        "title": { "type": "string", "description": "User's professional title (e.g. Dr., Prof.)." },
+        "rank": { "type": "string", "enum": ["STUDENT", "INTERN", "RESIDENT", "FELLOW", "ATTENDING", "CONSULTANT"], "description": "Medical professional rank." },
+        "institution": { "type": "string", "description": "User's affiliated institution." },
+        "specialization": { "type": "string", "description": "User's area of medical specialization." },
+        "bio": { "type": "string", "description": "User's clinical biography." },
         "email": { "type": "string", "format": "email", "description": "User's email address." },
         "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the user was created." },
         "lastLoginAt": { "type": "string", "format": "date-time", "description": "Timestamp of the last login to track streaks." },

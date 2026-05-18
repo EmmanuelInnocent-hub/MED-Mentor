@@ -28,9 +28,8 @@ export default function MedMentorLogo({
       </div>
       
       {showText && (
-        <div className={`font-black tracking-tight ${textSize} text-slate-900 dark:text-white flex items-center gap-1`}>
-          <span className="text-slate-900 dark:text-white">MED</span>
-          <span className="text-blue-600">MENTOR</span>
+        <div className={`font-black tracking-tight ${textSize} text-blue-600 flex items-center gap-1`}>
+          <span>MENTOR</span>
         </div>
       )}
     </div>

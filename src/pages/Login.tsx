@@ -17,7 +17,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
-  const [rank, setRank] = useState('Student');
+  const [rank, setRank] = useState('STUDENT');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ export default function Login() {
         await setDoc(doc(db, 'users', user.uid), {
           uid: user.uid,
           firstName: user.displayName?.split(' ')[0] || 'Doctor',
-          rank: 'Resident',
+          rank: 'RESIDENT',
           email: user.email,
           createdAt: serverTimestamp(),
           lastLoginAt: serverTimestamp(),
@@ -191,9 +191,9 @@ export default function Login() {
                       onChange={(e) => setRank(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/50 transition-all font-bold text-slate-700 appearance-none"
                     >
-                      <option>Student</option>
-                      <option>Resident</option>
-                      <option>Attending</option>
+                      <option value="STUDENT">Student</option>
+                      <option value="RESIDENT">Resident</option>
+                      <option value="ATTENDING">Attending</option>
                     </select>
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-black text-[10px]">▼</div>
                   </div>

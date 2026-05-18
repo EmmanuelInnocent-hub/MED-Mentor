@@ -15,14 +15,18 @@ service cloud.firestore {
     function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
 
     // 1. User Profiles
-    // Match against the userId placeholder
     match /users/{userId} {
       function isValidUser(data) {
         return data.uid == userId
           && data.firstName is string && data.firstName.size() <= 100
-          && data.rank in ['Student', 'Resident', 'Attending']
+          && data.rank in ['STUDENT', 'INTERN', 'RESIDENT', 'FELLOW', 'ATTENDING', 'CONSULTANT', 'Student', 'Resident', 'Attending']
           && data.email is string && data.email.size() <= 255
           && (data.createdAt == request.time || data.createdAt == existing().createdAt)
+          && (data.get('lastName', '') is string && data.get('lastName', '').size() <= 100)
+          && (data.get('title', '') is string && data.get('title', '').size() <= 20)
+          && (data.get('institution', '') is string && data.get('institution', '').size() <= 200)
+          && (data.get('specialization', '') is string && data.get('specialization', '').size() <= 100)
+          && (data.get('bio', '') is string && data.get('bio', '').size() <= 1000)
           && (data.get('knowledgeProgress', 0) is number)
           && (data.get('streak', 0) is number)
           && (data.get('lastLoginAt', request.time) is timestamp);
@@ -31,7 +35,10 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) 
-                    && incoming().diff(existing()).affectedKeys().hasOnly(['firstName', 'rank', 'knowledgeProgress', 'streak', 'lastLoginAt'])
+                    && incoming().diff(existing()).affectedKeys().hasOnly([
+                        'firstName', 'lastName', 'title', 'rank', 'institution', 
+                        'specialization', 'bio', 'knowledgeProgress', 'streak', 'lastLoginAt'
+                      ])
                     && isValidUser(incoming());
     }
 

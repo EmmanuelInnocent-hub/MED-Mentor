@@ -14,11 +14,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Panel, 
-  Group as PanelGroup, 
-  Separator as PanelResizeHandle 
-} from 'react-resizable-panels';
 import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
@@ -81,17 +76,12 @@ export default function Pathology() {
 
   return (
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <PanelGroup orientation={isMobile ? "vertical" : "horizontal"} className="flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         
         {/* Sidebar - Views/Thumbnails */}
         {!isMobile && (
-          <>
-            <Panel 
-              defaultSize={33} 
-              minSize={0} 
-              maxSize={100}
-              className="flex flex-col border-r border-[#1e2a3a] bg-[#111620]"
-            >
+          <aside className="w-72 flex flex-col border-r border-[#1e2a3a] bg-[#111620] shrink-0 overflow-hidden">
+
               <div className="p-6 border-b border-[#1e2a3a]">
                 <h3 className="text-[10px] font-mono uppercase tracking-[0.12em] text-[#5a7090]">Slide Views</h3>
               </div>
@@ -113,19 +103,10 @@ export default function Pathology() {
                   </button>
                 ))}
               </div>
-            </Panel>
-            <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
-              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-            </PanelResizeHandle>
-          </>
+          </aside>
         )}
-
-        <Panel 
-          defaultSize={isMobile ? 100 : 34} 
-          minSize={0}
-          maxSize={100}
-          className="flex flex-col min-w-0 bg-[#0d1008]"
-        >
+ 
+        <section className="flex-1 flex flex-col min-w-0 bg-[#0d1008] border-r border-[#1e2a3a] overflow-hidden">
           {/* Top Bar */}
           <div className="px-6 py-4 border-b border-[#1e2a3a] flex items-center justify-between bg-[#111620]/80 backdrop-blur-xl shrink-0">
             <div className="flex items-center gap-4">
@@ -226,19 +207,12 @@ export default function Pathology() {
               </div>
             </div>
           </div>
-        </Panel>
-
-        <PanelResizeHandle className="w-1.5 hover:w-2 transition-all bg-transparent hover:bg-teal-500/20 active:bg-teal-500/40 relative z-50">
-          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/20" />
-        </PanelResizeHandle>
+        </section>
 
         {/* Chat / Analysis Panel */}
-        <Panel 
-          defaultSize={isMobile ? 100 : 33} 
-          minSize={0}
-          maxSize={100}
-          className="flex flex-col bg-[#111620] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] lg:h-auto shrink-0"
-        >
+        {!isMobile && (
+          <aside className="w-[400px] flex flex-col bg-[#111620] shrink-0 border-l border-[#1e2a3a] overflow-hidden shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+
            <div className="px-6 py-6 border-b border-[#1e2a3a]">
              <h3 className="text-sm font-semibold text-white mb-1">Pathology Tutor</h3>
              <p className="text-[11px] font-mono text-[#5a7090]">H&E slide · Diagnostic analysis</p>
@@ -320,8 +294,9 @@ export default function Pathology() {
                 </button>
              </div>
            </div>
-        </Panel>
-      </PanelGroup>
+        </aside>
+        )}
+      </div>
     </div>
   );
 }

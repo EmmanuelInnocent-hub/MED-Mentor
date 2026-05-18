@@ -46,7 +46,18 @@ function AppContent() {
     return <>{children}</>;
   };
 
-  const isModulePage = ['/radiology', '/neurology', '/pathology', '/pharmacology', '/anatomy', '/pediatrics', '/tools/drug-checker', '/tools/progress', '/tools/leaderboard'].includes(location.pathname);
+  const isFullScreenPage = [
+    '/radiology', 
+    '/neurology', 
+    '/pathology', 
+    '/pharmacology', 
+    '/anatomy', 
+    '/pediatrics', 
+    '/tools/drug-checker', 
+    '/tools/progress', 
+    '/tools/leaderboard',
+    '/case/'
+  ].some(path => location.pathname.startsWith(path));
 
   return (
     <Routes>
@@ -56,9 +67,9 @@ function AppContent() {
         <ProtectedRoute>
           <div className="flex h-screen w-full bg-[#f8fafc] font-sans text-slate-900 overflow-hidden flex-col md:flex-row">
             <Sidebar />
-            <main className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isModulePage ? '' : 'pb-24'} md:pb-0`}>
-              <div className={`flex-1 overflow-y-auto custom-scrollbar ${isModulePage ? 'p-0' : 'px-4 md:px-10'}`}>
-                <div className={`w-full h-auto min-h-full ${isModulePage ? 'max-w-none pt-0 pb-0' : 'pt-10 md:pt-16 pb-32 max-w-7xl mx-auto'}`}>
+            <main className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isFullScreenPage ? 'pb-16 md:pb-0' : 'pb-16 md:pb-0'}`}>
+              <div className={`flex-1 overflow-y-auto custom-scrollbar ${isFullScreenPage ? 'p-0' : 'px-4 md:px-10'}`}>
+                <div className={`w-full ${isFullScreenPage ? 'h-full max-w-none pt-0 pb-0' : 'h-auto min-h-full pt-6 md:pt-16 pb-20 md:pb-32 max-w-7xl mx-auto'}`}>
                   <Routes>
                     <Route index element={<Dashboard />} />
                     <Route path="case/setup" element={<CaseSetup />} />

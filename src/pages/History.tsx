@@ -73,13 +73,13 @@ export default function History() {
   });
 
   return (
-    <div className="space-y-6">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Clinical History</h1>
-        <p className="text-slate-500 mt-1">Repository of your diagnostic paths and reasoning evaluations.</p>
+    <div className="space-y-6 pb-20 md:pb-0">
+      <header className="mb-8 text-center md:text-left pt-2 md:pt-0 px-4 md:px-0">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 font-serif italic">Clinical History</h1>
+        <p className="text-slate-500 mt-1 text-sm md:text-base">Repository of your diagnostic paths and reasoning evaluations.</p>
       </header>
 
-      <div className="flex flex-col md:flex-row gap-4 items-center">
+      <div className="flex flex-col md:flex-row gap-4 items-center px-4 md:px-0">
         <div className="relative flex-1 group w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
           <input 
@@ -87,7 +87,7 @@ export default function History() {
             placeholder="Filter sessions by case title..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-sm font-medium"
+            className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-sm font-medium shadow-sm"
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto">
@@ -96,7 +96,7 @@ export default function History() {
             <select 
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="w-full pl-12 pr-10 py-3.5 bg-white border border-slate-200 rounded-2xl appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-xs font-bold uppercase tracking-widest text-slate-600 cursor-pointer"
+              className="w-full pl-12 pr-10 py-3.5 bg-white border border-slate-200 rounded-2xl appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-xs font-bold uppercase tracking-widest text-slate-600 cursor-pointer shadow-sm"
             >
               {specialties.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -105,7 +105,7 @@ export default function History() {
         </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col mx-4 md:mx-0">
         {loading ? (
           <div className="px-6 py-20 text-center flex flex-col items-center gap-4">
             <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />

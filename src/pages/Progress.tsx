@@ -60,20 +60,20 @@ export default function Progress() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0a0e14] text-[#e8edf5] font-sans">
-      <div className="max-w-7xl mx-auto w-full p-6 md:p-12 space-y-10">
+      <div className="max-w-7xl mx-auto w-full p-4 md:p-12 space-y-8 md:space-y-10">
         
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-3xl font-serif text-white mb-2 italic">Performance Analytics</h1>
-            <p className="text-sm text-[#5a7090] font-medium tracking-tight">AI-generated weak-spot analysis · Updated after every 15 minutes of study</p>
+          <div className="text-center md:text-left">
+            <h1 className="text-2xl md:text-3xl font-serif text-white mb-2 italic">Performance Analytics</h1>
+            <p className="text-[10px] md:text-sm text-[#5a7090] font-medium tracking-tight">AI-generated weak-spot analysis · Updated after every 15 minutes of study</p>
           </div>
-          <div className="flex items-center gap-4">
-             <div className="flex bg-[#111620] p-1 rounded-lg border border-[#243044]">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+             <div className="flex bg-[#111620] p-1 rounded-lg border border-[#243044] w-full sm:w-auto">
                 {['7d', '30d', 'All'].map(r => (
                   <button 
                     key={r}
                     onClick={() => setActiveRange(r)}
-                    className={`px-3 py-1 text-[10px] font-mono font-bold rounded-md transition-all ${
+                    className={`flex-1 sm:flex-none px-4 py-2 sm:py-1 text-[10px] font-mono font-bold rounded-md transition-all ${
                       activeRange === r ? 'bg-blue-600 text-white' : 'text-[#5a7090] hover:text-white'
                     }`}
                   >
@@ -81,27 +81,27 @@ export default function Progress() {
                   </button>
                 ))}
              </div>
-             <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2 flex items-center gap-3">
+             <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-2 flex items-center gap-3 w-full sm:w-auto justify-center">
                <span className="text-lg">🔥</span>
-               <span className="text-sm font-bold text-amber-500 font-mono">12-DAY STREAK</span>
+               <span className="text-[10px] sm:text-sm font-bold text-amber-500 font-mono">12-DAY STREAK</span>
              </div>
           </div>
         </header>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
            {stats.map((s, i) => (
              <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               key={i} 
-              className="bg-[#111620] border border-[#243044] rounded-2xl p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all"
+              className="bg-[#111620] border border-[#243044] rounded-2xl p-5 md:p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all"
              >
                 <div className="relative z-10">
-                   <div className={`text-4xl font-serif mb-2 ${s.color}`}>{s.val}</div>
-                   <div className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090] mb-3">{s.label}</div>
-                   <div className="text-[11px] font-mono text-green-500/80">{s.delta}</div>
+                   <div className={`text-2xl md:text-4xl font-serif mb-1 md:mb-2 ${s.color}`}>{s.val}</div>
+                   <div className="text-[8px] md:text-[10px] font-mono uppercase tracking-widest text-[#5a7090] mb-2 md:mb-3">{s.label}</div>
+                   <div className="text-[9px] md:text-[11px] font-mono text-green-500/80">{s.delta}</div>
                 </div>
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 blur-3xl rounded-full" />
              </motion.div>
@@ -109,20 +109,20 @@ export default function Progress() {
         </div>
 
         {/* Main Analytics Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
            {/* Chart */}
-           <div className="lg:col-span-2 bg-[#111620] border border-[#243044] rounded-3xl p-8">
-              <div className="flex items-center justify-between mb-8">
-                 <div>
-                    <h3 className="text-sm font-bold text-white mb-1 uppercase tracking-wider">Score Progression</h3>
-                    <p className="text-[10px] font-mono text-[#5a7090]">Clinical reasoning accuracy over time</p>
+           <div className="lg:col-span-2 bg-[#111620] border border-[#243044] rounded-3xl p-6 md:p-8">
+              <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+                 <div className="text-center sm:text-left">
+                    <h3 className="text-xs md:text-sm font-bold text-white mb-1 uppercase tracking-wider">Score Progression</h3>
+                    <p className="text-[8px] md:text-[10px] font-mono text-[#5a7090]">Clinical reasoning accuracy over time</p>
                  </div>
-                 <div className="flex items-center gap-4 text-[10px] font-mono text-[#5a7090]">
-                    <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500" /> Accuracy (%)</div>
-                    <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-teal-500" /> Study Hours</div>
+                 <div className="flex items-center gap-4 text-[8px] md:text-[10px] font-mono text-[#5a7090]">
+                    <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-500" /> Accuracy (%)</div>
+                    <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-teal-500" /> Study Hours</div>
                  </div>
               </div>
-              <div className="h-64 w-full">
+              <div className="h-48 md:h-64 w-full">
                  <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={data}>
                        <defs>
@@ -135,11 +135,11 @@ export default function Progress() {
                         dataKey="day" 
                         axisLine={false} 
                         tickLine={false} 
-                        tick={{ fill: '#5a7090', fontSize: 10, fontFamily: 'DM Mono' }} 
+                        tick={{ fill: '#5a7090', fontSize: 8, fontFamily: 'DM Mono' }} 
                        />
                        <YAxis hide />
                        <Tooltip 
-                        contentStyle={{ backgroundColor: '#111620', border: '1px solid #243044', borderRadius: '12px', fontSize: '12px' }}
+                        contentStyle={{ backgroundColor: '#111620', border: '1px solid #243044', borderRadius: '12px', fontSize: '10px' }}
                         itemStyle={{ color: '#e8edf5' }}
                        />
                        <Area type="monotone" dataKey="score" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorScore)" />
@@ -149,28 +149,28 @@ export default function Progress() {
            </div>
 
            {/* AI Insight Sidebar */}
-           <div className="bg-gradient-to-br from-blue-600/10 to-transparent border border-blue-500/20 rounded-3xl p-8 flex flex-col justify-between">
+           <div className="bg-gradient-to-br from-blue-600/10 to-transparent border border-blue-500/20 rounded-3xl p-6 md:p-8 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center text-blue-400"><Info className="w-4 h-4" /></div>
-                  <h3 className="text-sm font-bold text-blue-400 font-mono uppercase tracking-widest">AI Intelligence</h3>
+                  <h3 className="text-xs md:text-sm font-bold text-blue-400 font-mono uppercase tracking-widest">AI Intelligence</h3>
                 </div>
-                <p className="text-xs text-[#a8b8cc] leading-relaxed mb-8">
+                <p className="text-xs text-[#a8b8cc] leading-relaxed mb-6 md:mb-8 font-medium">
                   Focus on <strong className="text-amber-500 font-bold">Neurology</strong> cases — review the neuro exam order specifically. 
                   You tend to diagnose correctly but fail to prioritize management steps correctly.
                 </p>
                 <div className="space-y-4">
-                  <div className="flex items-start gap-4 text-xs text-[#a8b8cc]">
+                  <div className="flex items-start gap-4 text-[11px] text-[#a8b8cc] font-medium">
                     <div className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 font-mono flex items-center justify-center shrink-0">1</div>
                     <span>Prioritize ABCDE in emergency simulations.</span>
                   </div>
-                  <div className="flex items-start gap-4 text-xs text-[#a8b8cc]">
+                  <div className="flex items-start gap-4 text-[11px] text-[#a8b8cc] font-medium">
                     <div className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 font-mono flex items-center justify-center shrink-0">2</div>
                     <span>Review Pharmacokinetics for elders.</span>
                   </div>
                 </div>
               </div>
-              <button className="mt-8 w-full py-4 bg-blue-600/10 border border-blue-500/20 rounded-xl text-xs font-mono text-blue-400 font-bold hover:bg-blue-600/20 transition-all">
+              <button className="mt-8 w-full py-4 md:py-4 bg-blue-600/10 border border-blue-500/20 rounded-xl text-[10px] font-mono text-blue-400 font-bold hover:bg-blue-600/20 transition-all uppercase tracking-widest">
                 GENERATE CUSTOM MOCK EXAM
               </button>
            </div>
@@ -178,15 +178,15 @@ export default function Progress() {
 
         {/* Specialty Breakdown */}
         <div className="space-y-6">
-          <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#5a7090]">Specialty Proficiency Breakdown</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <h3 className="text-[8px] md:text-[10px] font-mono uppercase tracking-widest text-[#5a7090] text-center md:text-left">Specialty Proficiency Breakdown</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
              {specialties.map((spec, i) => (
                <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.1 }}
                 key={i} 
-                className="bg-[#111620] border border-[#243044] rounded-3xl p-6 group hover:border-blue-500/40 transition-all cursor-pointer overflow-hidden relative"
+                className="bg-[#111620] border border-[#243044] rounded-[2rem] p-5 md:p-6 group hover:border-blue-500/40 transition-all cursor-pointer overflow-hidden relative"
                >
                   <div className="flex items-center justify-between mb-4 relative z-10">
                     <div className="flex items-center gap-3">

@@ -9,19 +9,25 @@ import {
   ArrowLeft,
   Send,
   ArrowRight,
-  Loader2
+  Loader2,
+  MoreVertical,
+  X,
+  ChevronUp,
+  ChevronDown,
+  Menu,
+  Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { getModuleResponse } from '../lib/gemini';
 import { Message } from '../types';
 
-const BodySVG = ({ system }: { system: string }) => {
+const BodySVG = ({ system, isMobile }: { system: string; isMobile?: boolean }) => {
   const isCardio = system === 'cardio';
   const isResp = system === 'resp';
   
   return (
-    <svg className="w-full h-full lg:max-w-md drop-shadow-[0_0_40px_rgba(45,212,191,0.15)]" viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg">
+    <svg className={`w-full h-full drop-shadow-[0_0_40px_rgba(45,212,191,0.15)] ${isMobile ? 'max-h-[50vh]' : 'lg:max-w-md'}`} viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <radialGradient id="heartGrad" cx="50%" cy="40%" r="60%">
                 <stop offset="0%" stopColor="#7f1d1d"/>
@@ -100,6 +106,9 @@ export default function Anatomy() {
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isChatExpanded, setIsChatExpanded] = useState(false);
+  const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const hotspots = allHotspots[activeSystem] || [];
@@ -160,7 +169,7 @@ export default function Anatomy() {
     <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#0a0e14] text-[#e8edf5] font-sans">
       <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         
-        {/* Sidebar - Systems */}
+        {/* Desktop Sidebar - Systems */}
         {isLargeScreen && (
           <aside className="w-72 flex flex-col border-r border-[#1e2a3a] bg-[#111620] shrink-0 overflow-hidden">
 
@@ -186,30 +195,116 @@ export default function Anatomy() {
           </aside>
         )}
  
+        {/* Mobile Sidebar Bottom Sheet */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsSidebarOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] md:hidden"
+              />
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed bottom-0 left-0 right-0 h-[60vh] bg-[#111620] z-[120] md:hidden rounded-t-[2.5rem] flex flex-col overflow-hidden border-t border-white/10 shadow-2xl"
+              >
+                <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto font-black my-4 flex-shrink-0" />
+                <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-teal-500/80">Body Systems</h3>
+                  <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-slate-500"><X className="w-5 h-5"/></button>
+                </div>
+                <div className="flex-1 overflow-y-auto no-scrollbar p-2 space-y-1">
+                  {bodySystems.map((sys) => (
+                    <button 
+                      key={sys.id}
+                      onClick={() => {
+                        setActiveSystem(sys.id);
+                        setIsSidebarOpen(false);
+                      }}
+                      className={`w-full text-left p-5 rounded-2xl flex items-center gap-4 transition-all ${
+                        activeSystem === sys.id ? 'bg-[#161d2a] border-l-4 border-teal-400' : 'hover:bg-[#161d2a]/50 border-l-4 border-transparent text-[#5a7090]'
+                      }`}
+                    >
+                      <div className={`w-3 h-3 rounded-full ${sys.color} shadow-[0_0_10px_rgba(45,212,191,0.3)]`} />
+                      <span className={`text-sm font-black uppercase tracking-widest ${activeSystem === sys.id ? 'text-white' : ''}`}>{sys.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+ 
         {/* Main Viewer Area */}
-        <section className="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-[#0d1a20] to-[#050a0e] border-r border-[#1e2a3a] overflow-hidden relative">
+        <section className={`flex-1 flex flex-col min-w-0 bg-gradient-to-br from-[#0d1a20] to-[#050a0e] border-r border-[#1e2a3a] overflow-hidden relative ${isMobile ? 'pb-16' : ''}`}>
 
-          {/* Top Bar */}
-          <div className="absolute top-0 left-0 right-0 px-6 py-4 border-b border-[#1e2a3a]/30 flex items-center justify-between bg-[#111620]/40 backdrop-blur-xl z-10">
-             <div className="flex items-center gap-4">
+          {/* Top Bar Navigation */}
+          <div className="absolute top-0 left-0 right-0 px-4 md:px-6 py-4 border-b border-[#1e2a3a]/30 flex items-center justify-between bg-[#111620]/80 backdrop-blur-xl shrink-0 z-10 transition-all">
+             <div className="flex items-center gap-3 md:gap-4 min-w-0">
               <button 
                 onClick={() => navigate(-1)}
-                className="p-2 hover:bg-white/5 text-[#5a7090] hover:text-white rounded-lg transition-colors"
+                className="p-2.5 hover:bg-white/5 text-[#5a7090] hover:text-white rounded-xl transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-5 h-5" />
               </button>
-              <div className="flex items-center gap-3">
-                <Box className="w-5 h-5 text-teal-400" />
-                <h1 className="text-lg font-serif italic text-white tracking-tight">Anatomy Explorer</h1>
+              <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                <Box className="w-5 h-5 text-teal-400 shrink-0" />
+                <h1 className="text-sm md:text-lg font-serif italic text-white tracking-tight truncate">Anatomy Explorer</h1>
               </div>
             </div>
-            <div className="flex gap-2">
+
+            {/* Mobile Actions Header */}
+            <div className="md:hidden flex items-center gap-1">
+              <div className="relative">
+                <button 
+                  onClick={() => setShowOverflowMenu(!showOverflowMenu)}
+                  className="p-3 text-[#5a7090] hover:text-white active:bg-white/10 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+                <AnimatePresence>
+                  {showOverflowMenu && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-[#0a0e14]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl py-2 z-50 overflow-hidden"
+                    >
+                      {[
+                        { id: 'systems', label: 'Systems', icon: Menu, action: () => setIsSidebarOpen(true) },
+                        { id: 'reset', label: 'Reset View', icon: RotateCcw, action: () => { /* Reset logic */ } },
+                        { id: 'atlas', label: 'Anatomy Atlas', icon: Settings, action: () => { /* Atlas logic */ } },
+                      ].map((item) => (
+                        <button 
+                          key={item.id}
+                          onClick={() => {
+                            item.action();
+                            setShowOverflowMenu(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3.5 text-[10px] font-black uppercase tracking-[0.15em] text-[#a8b8cc] hover:text-white transition-all active:bg-white/5"
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <div className="hidden md:flex gap-2">
                <button className="p-2 bg-white/5 border border-white/10 rounded-lg text-teal-400 transition-all hover:bg-teal-500/10"><RotateCcw className="w-4 h-4" /></button>
             </div>
           </div>
 
-          <div className="flex-1 relative flex items-center justify-center p-8 group overflow-hidden">
-             <BodySVG system={activeSystem} />
+          <div className="flex-1 relative flex items-center justify-center p-4 md:p-8 group overflow-hidden touch-none">
+             <BodySVG system={activeSystem} isMobile={isMobile} />
              
              {hotspots.map((hs, i) => (
                <motion.div 
@@ -221,9 +316,9 @@ export default function Anatomy() {
                  style={{ top: hs.top, left: hs.left }}
                  onClick={() => handleHotspotClick(hs)}
                >
-                 <div className="w-5 h-5 rounded-full border-2 border-teal-500/50 bg-teal-500/10 flex items-center justify-center relative">
+                 <div className="w-6 h-6 md:w-5 md:h-5 rounded-full border-2 border-teal-500/50 bg-teal-500/10 flex items-center justify-center relative touch-manipulation">
                    <div className="absolute inset-0 bg-teal-400 rounded-full animate-ping opacity-20" />
-                   <div className="w-1.5 h-1.5 bg-teal-400 rounded-full" />
+                   <div className="w-2 h-2 md:w-1.5 md:h-1.5 bg-teal-400 rounded-full" />
                  </div>
                </motion.div>
              ))}
@@ -231,18 +326,18 @@ export default function Anatomy() {
              <AnimatePresence>
               {selectedStruct && (
                 <motion.div 
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="absolute top-24 right-6 md:right-12 w-64 bg-[#111620]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 shadow-2xl z-30"
+                  initial={{ opacity: 0, x: 20, scale: 0.9 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 20, scale: 0.9 }}
+                  className="absolute top-24 md:top-28 right-4 md:right-12 left-4 md:left-auto md:w-64 bg-[#111620]/95 backdrop-blur-3xl border border-white/10 rounded-3xl p-6 shadow-2xl z-30"
                 >
-                  <h3 className="text-base font-serif text-teal-400 mb-1">{selectedStruct.label}</h3>
-                  <p className="text-xs text-[#a8b8cc] leading-relaxed mb-6">{selectedStruct.info}</p>
+                  <h3 className="text-lg font-serif text-teal-400 mb-2 leading-tight">{selectedStruct.label}</h3>
+                  <p className="text-[11px] md:text-xs text-[#a8b8cc] leading-relaxed mb-6 font-medium italic">{selectedStruct.info}</p>
                   <button 
                     onClick={() => setSelectedStruct(null)} 
-                    className="w-full py-2 bg-white/5 border border-white/10 rounded-lg text-[10px] font-mono text-[#5a7090] hover:text-white transition-colors"
+                    className="w-full py-3.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-[#5a7090] hover:text-white transition-all active:scale-95 touch-manipulation"
                   >
-                    DISMISS
+                    DISMISS STRUCT
                   </button>
                 </motion.div>
               )}
@@ -250,54 +345,135 @@ export default function Anatomy() {
           </div>
         </section>
 
-        {/* Tutor Panel */}
-        {isLargeScreen && (
+        {/* Mobile Chat Peek / Bottom Drawer */}
+        <AnimatePresence>
+          {isMobile && (
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: isChatExpanded ? 0 : 'calc(100% - 64px)' }}
+              className="fixed inset-x-0 bottom-0 z-[100] bg-[#111620] md:hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)] border-t border-white/10 rounded-t-[2.5rem]"
+              style={{ height: isChatExpanded ? '90vh' : 'auto' }}
+            >
+              <div 
+                className="w-full py-4 flex flex-col items-center cursor-pointer"
+                onClick={() => setIsChatExpanded(!isChatExpanded)}
+              >
+                <div className="w-12 h-1.5 bg-white/10 rounded-full mb-2" />
+                {!isChatExpanded && (
+                  <div className="px-6 w-full flex items-center justify-between">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse flex-shrink-0" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#a8b8cc] truncate">
+                        {messages[messages.length - 1].content}
+                      </span>
+                    </div>
+                    <ChevronUp className="w-5 h-5 text-[#5a7090]" />
+                  </div>
+                )}
+              </div>
+
+              {isChatExpanded && (
+                <div className="flex flex-col h-full overflow-hidden">
+                   <div className="px-6 pb-4 border-b border-[#1e2a3a]">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-black uppercase tracking-[0.1em] text-white">Anatomy Tutor</h3>
+                          <p className="text-[10px] text-[#5a7090] font-mono uppercase tracking-wider">{activeSystem} Lab Active</p>
+                        </div>
+                        <button onClick={() => setIsChatExpanded(false)} className="p-2 bg-white/5 rounded-xl">
+                          <ChevronDown className="w-5 h-5 text-[#5a7090]" />
+                        </button>
+                      </div>
+                   </div>
+
+                   <div className="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar bg-[#0a0e14]">
+                      {messages.map((msg, idx) => (
+                        <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                          <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${
+                            msg.role === 'user' ? 'bg-teal-600 text-white shadow-lg font-bold' : 'bg-[#161d2a] text-[#e8edf5] border border-[#1e2a3a]'
+                          }`}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+                      {isTyping && (
+                        <div className="flex items-center gap-2 text-teal-400 p-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Browsing...</span>
+                        </div>
+                      )}
+                      <div ref={chatEndRef} />
+                   </div>
+
+                   <div className="p-4 bg-[#111620] border-t border-[#1e2a3a] pb-10">
+                      <div className="relative">
+                        <textarea
+                          value={input}
+                          onChange={(e) => setInput(e.target.value)}
+                          className="w-full bg-[#161d2a] border border-white/10 rounded-2xl p-4 pr-14 text-sm font-bold text-white resize-none h-14 outline-none"
+                          placeholder="Type findings..."
+                        />
+                        <button 
+                          onClick={() => handleSendMessage()}
+                          className="absolute right-2 bottom-2 p-3 bg-teal-600 text-white rounded-xl shadow-lg active:scale-95"
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
+                      </div>
+                   </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Desktop Tutor Panel */}
+        {!isMobile && isLargeScreen && (
           <aside className="w-[400px] flex flex-col bg-[#111620] shrink-0 border-l border-[#1e2a3a] overflow-hidden shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+            <div className="px-6 py-6 border-b border-[#1e2a3a] shrink-0">
+              <h3 className="text-sm font-semibold text-white mb-1">Anatomy Tutor</h3>
+              <p className="text-[11px] font-mono text-[#5a7090] uppercase tracking-wider">{activeSystem} LAB ACTIVE</p>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0a0e14] custom-scrollbar">
+              <AnimatePresence mode="popLayout">
+                {messages.map((msg, idx) => (
+                  <motion.div 
+                    key={idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                  >
+                    <span className="text-[9px] font-mono uppercase text-[#5a7090] mb-1 font-black tracking-widest">
+                      {msg.role === 'assistant' ? 'Anatomy Tutor' : 'Medical Student'}
+                    </span>
+                    <div className={`p-4 rounded-2xl text-xs leading-relaxed max-w-[90%] ${
+                      msg.role === 'assistant' 
+                        ? 'bg-[#161d2a] rounded-tl-none border border-[#1e2a3a] text-[#e8edf5]' 
+                        : 'bg-teal-600 rounded-tr-none text-white font-black'
+                    }`}>
+                      {msg.content}
+                    </div>
+                  </motion.div>
+                ))}
+                {isTyping && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col items-start"
+                  >
+                    <span className="text-[9px] font-mono uppercase text-[#5a7090] mb-1">Anatomy Tutor</span>
+                    <div className="bg-[#161d2a] p-3 rounded-2xl rounded-tl-none border border-[#1e2a3a] flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin text-teal-400" />
+                      <span className="text-[10px] text-[#5a7090] italic">Browsing atlas...</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div ref={chatEndRef} />
+            </div>
 
-           <div className="px-6 py-6 border-b border-[#1e2a3a] shrink-0">
-             <h3 className="text-sm font-semibold text-white mb-1">Anatomy Tutor</h3>
-             <p className="text-[11px] font-mono text-[#5a7090] uppercase tracking-wider">{activeSystem} LAB ACTIVE</p>
-           </div>
-           
-           <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0a0e14] custom-scrollbar">
-             <AnimatePresence mode="popLayout">
-               {messages.map((msg, idx) => (
-                 <motion.div 
-                   key={idx}
-                   initial={{ opacity: 0, y: 10 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                 >
-                   <span className="text-[9px] font-mono uppercase text-[#5a7090] mb-1">
-                     {msg.role === 'assistant' ? 'Anatomy Tutor' : 'Medical Student'}
-                   </span>
-                   <div className={`p-4 rounded-2xl text-xs leading-relaxed max-w-[90%] ${
-                     msg.role === 'assistant' 
-                       ? 'bg-[#161d2a] rounded-tl-none border border-[#1e2a3a] text-[#e8edf5]' 
-                       : 'bg-teal-600 rounded-tr-none text-white'
-                   }`}>
-                     {msg.content}
-                   </div>
-                 </motion.div>
-               ))}
-               {isTyping && (
-                 <motion.div 
-                   initial={{ opacity: 0, y: 10 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   className="flex flex-col items-start"
-                 >
-                   <span className="text-[9px] font-mono uppercase text-[#5a7090] mb-1">Anatomy Tutor</span>
-                   <div className="bg-[#161d2a] p-3 rounded-2xl rounded-tl-none border border-[#1e2a3a] flex items-center gap-2">
-                     <Loader2 className="w-3 h-3 animate-spin text-teal-400" />
-                     <span className="text-[10px] text-[#5a7090] italic">Browsing atlas...</span>
-                   </div>
-                 </motion.div>
-               )}
-             </AnimatePresence>
-             <div ref={chatEndRef} />
-           </div>
-
-           <div className="p-6 border-t border-[#1e2a3a] bg-[#111620]">
+            <div className="p-6 border-t border-[#1e2a3a] bg-[#111620]">
               <div className="relative group">
                 <textarea 
                   value={input}
@@ -308,20 +484,21 @@ export default function Anatomy() {
                       handleSendMessage();
                     }
                   }}
-                  className="w-full bg-[#161d2a] border border-[#243044] rounded-xl p-4 pr-12 text-xs text-white placeholder-[#2d3d56] resize-none h-20 focus:border-teal-500/40 outline-none transition-all"
+                  className="w-full bg-[#161d2a] border border-[#243044] rounded-2xl p-4 pr-12 text-xs text-white placeholder-[#2d3d56] resize-none h-20 focus:border-teal-500/40 outline-none transition-all shadow-inner"
                   placeholder="Ask about anatomical landmarks, origins, or insertions..." 
                 />
                 <button 
                   onClick={handleSendMessage}
                   disabled={isTyping}
-                  className="absolute bottom-4 right-4 p-2 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white rounded-lg transition-all active:scale-95"
+                  className="absolute bottom-4 right-4 p-3 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white rounded-xl transition-all active:scale-95 shadow-xl"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </div>
-           </div>
-        </aside>
+            </div>
+          </aside>
         )}
+
       </div>
     </div>
   );

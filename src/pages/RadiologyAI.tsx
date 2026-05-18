@@ -14,7 +14,12 @@ import {
   Construction,
   CheckCircle2,
   AlertCircle,
-  FileText
+  FileText,
+  Menu,
+  MoreVertical,
+  X,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getChatResponse } from '../lib/gemini';
@@ -179,6 +184,35 @@ export default function RadiologyAI() {
 
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1280);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isChatExpanded, setIsChatExpanded] = useState(false);
+  const [showOverflowMenu, setShowOverflowMenu] = useState(false);
+
+  // Touch Handling for Zoom
+  const [touchStartDist, setTouchStartDist] = useState(0);
+  const [initialZoom, setInitialZoom] = useState(1.0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+      setTouchStartDist(dist);
+      setInitialZoom(zoomLevel);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && touchStartDist > 0) {
+      const dist = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+      const zoom = initialZoom * (dist / touchStartDist);
+      setZoomLevel(Math.max(0.5, Math.min(zoom, 5.0)));
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -262,67 +296,108 @@ export default function RadiologyAI() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#04070a] relative">
+    <div className="flex flex-col h-[100dvh] md:h-screen overflow-hidden bg-[#04070a] relative font-sans text-slate-200">
       <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         
-        {/* Sidebar - Case Library */}
+        {/* Desktop Sidebar - Case Library */}
         {isLargeScreen && (
           <aside className="w-72 flex flex-col border-r border-white/5 bg-[#080c14] shrink-0 overflow-hidden">
-
-              <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Case Library</h3>
-                <button className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 transition-colors">
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar pt-2">
-                {caseLibrary.map((item) => (
-                  <RecursiveCaseItem 
-                    key={item.id} 
-                    item={item} 
-                    activeId={activeCase.id} 
-                    onSelect={handleCaseSelect}
-                  />
-                ))}
-              </div>
-              <div className="p-6 border-t border-white/5">
-                <button 
-                  onClick={() => setIsUploadVisible(true)}
-                  className="w-full py-3 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-400 hover:text-white hover:border-white/20 transition-all flex items-center justify-center gap-2 group"
-                >
-                  <Upload className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">External DICOM</span>
-                </button>
-              </div>
+            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Case Library</h3>
+              <button className="p-1.5 hover:bg-white/5 rounded-lg text-slate-500 transition-colors">
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar pt-2">
+              {caseLibrary.map((item) => (
+                <RecursiveCaseItem 
+                  key={item.id} 
+                  item={item} 
+                  activeId={activeCase.id} 
+                  onSelect={handleCaseSelect}
+                />
+              ))}
+            </div>
+            <div className="p-6 border-t border-white/5">
+              <button 
+                onClick={() => setIsUploadVisible(true)}
+                className="w-full py-3 px-4 bg-white/5 border border-white/10 rounded-xl text-slate-400 hover:text-white hover:border-white/20 transition-all flex items-center justify-center gap-2 group"
+              >
+                <Upload className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
+                <span className="text-[10px] font-black uppercase tracking-widest">External DICOM</span>
+              </button>
+            </div>
           </aside>
         )}
+
+        {/* Mobile Sidebar Bottom Sheet */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsSidebarOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] md:hidden"
+              />
+              <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed bottom-0 left-0 right-0 h-[75vh] bg-[#080c14] z-[120] md:hidden rounded-t-[2.5rem] flex flex-col overflow-hidden border-t border-white/10 shadow-2xl"
+              >
+                <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto my-4 flex-shrink-0" />
+                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-400">Case Library</h3>
+                  <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-slate-500"><X className="w-5 h-5"/></button>
+                </div>
+                <div className="flex-1 overflow-y-auto no-scrollbar p-2">
+                  {caseLibrary.map((item) => (
+                    <RecursiveCaseItem 
+                      key={item.id} 
+                      item={item} 
+                      activeId={activeCase.id} 
+                      onSelect={(c) => {
+                        handleCaseSelect(c);
+                        setIsSidebarOpen(false);
+                      }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
  
         {/* Main Viewer area */}
-        <section className="flex-1 flex flex-col min-w-0 bg-[#020408] border-r border-white/5 overflow-hidden">
+        <section className={`flex-1 flex flex-col min-w-0 bg-[#020408] border-r border-white/5 overflow-hidden ${isMobile ? 'h-full' : ''}`}>
           {/* Top Bar Navigation */}
-          <div className="px-4 md:px-6 py-4 border-b border-white/5 flex items-center justify-between bg-[#080c14]/80 backdrop-blur-xl shrink-0">
+          <div className="px-4 md:px-6 py-4 border-b border-white/5 flex items-center justify-between bg-[#080c14]/80 backdrop-blur-xl shrink-0 z-10">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
               <button 
                 onClick={() => navigate(-1)}
-                className="p-2 hover:bg-white/5 text-slate-500 hover:text-white rounded-lg transition-colors shrink-0"
+                className="p-2 hover:bg-white/5 text-slate-500 hover:text-white rounded-lg transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-2 md:gap-3 min-w-0">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
                   <Activity className="w-5 h-5 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-[11px] md:text-sm font-black uppercase tracking-tight text-white truncate">
+                  <h1 className="text-[12px] md:text-sm font-black uppercase tracking-tight text-white truncate">
                     Diagnostic <span className="text-blue-500">Workstation</span>
                   </h1>
-                  <p className="text-[8px] md:text-[9px] text-slate-500 font-mono tracking-widest truncate">
+                  <p className="text-[9px] text-slate-500 font-mono tracking-widest truncate">
                     {activeCase.name} · RADIOLOGY AI
                   </p>
                 </div>
               </div>
             </div>
             
+            {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-2 shrink-0">
               <div className="flex bg-[#04070a] rounded-lg p-1 border border-white/5">
                 <button 
@@ -352,17 +427,52 @@ export default function RadiologyAI() {
               </div>
             </div>
 
-            {/* Mobile Actions Drawer Toggle */}
-            <div className="md:hidden flex items-center gap-2">
-              <button className="p-2 text-slate-500 hover:text-white">
-                <Settings className="w-5 h-5" />
-              </button>
+            {/* Mobile Actions Header */}
+            <div className="md:hidden flex items-center gap-1">
+              <div className="relative">
+                <button 
+                  onClick={() => setShowOverflowMenu(!showOverflowMenu)}
+                  className="p-3 text-slate-500 hover:text-white active:bg-white/10 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+                <AnimatePresence>
+                  {showOverflowMenu && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-[#0a0e14]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl py-2 z-50"
+                    >
+                      {[
+                        { id: 'zoom', label: 'Zoom Tool', icon: Maximize, action: () => setActiveTool('zoom') },
+                        { id: 'annotate', label: 'Annotate', icon: Pencil, action: () => setActiveTool('annotate') },
+                        { id: 'window', label: 'Window Cycle', icon: Layout, action: cycleWindow },
+                        { id: 'upload', label: 'Upload DICOM', icon: Upload, action: () => setIsUploadVisible(true) },
+                        { id: 'cases', label: 'Case Library', icon: FileText, action: () => setIsSidebarOpen(true) },
+                      ].map((item) => (
+                        <button 
+                          key={item.id}
+                          onClick={() => {
+                            item.action();
+                            setShowOverflowMenu(false);
+                          }}
+                          className={`w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all ${activeTool === item.id ? 'text-blue-500 bg-blue-500/5' : 'text-slate-400 hover:text-white'}`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
 
           {/* Imaging Area */}
           <div 
-            className="flex-1 relative flex items-center justify-center p-4 md:p-8 overflow-hidden cursor-crosshair"
+            className={`flex-1 relative flex items-center justify-center bg-[#000] overflow-hidden cursor-crosshair touch-none ${isMobile ? 'h-[55vh] min-h-[400px]' : ''}`}
             onWheel={(e) => {
               if (activeTool === 'zoom') {
                 e.preventDefault();
@@ -370,12 +480,14 @@ export default function RadiologyAI() {
                 setZoomLevel(prev => Math.max(0.5, Math.min(prev + delta, 5.0)));
               }
             }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
           >
             <div 
-              className={`relative w-full h-full lg:max-w-2xl flex items-center justify-center bg-[#000] shadow-[0_0_100px_rgba(37,99,235,0.05)] border transition-all duration-300 ${activeTool !== 'viewer' ? 'border-blue-500/30' : 'border-white/5'} rounded-sm overflow-hidden`}
+              className={`relative w-full h-full md:max-w-2xl flex items-center justify-center bg-[#000] shadow-[0_0_100px_rgba(37,99,235,0.05)] border transition-all duration-300 ${activeTool !== 'viewer' ? 'border-blue-500/30' : 'border-white/5'} rounded-sm overflow-hidden`}
             >
               <svg 
-                className="w-full h-full" 
+                className="w-full h-full touch-none" 
                 style={{ 
                   filter: windowFilters[windowPreset],
                 }}
@@ -484,92 +596,167 @@ export default function RadiologyAI() {
           </div>
         </section>
 
-        {/* Chat / AI Analysis Panel */}
-        {isLargeScreen && (
-          <aside className="w-[400px] flex flex-col bg-[#05080c] lg:bg-[#080c14] shrink-0 border-l border-white/5 overflow-hidden shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
-
-          <div className="px-6 py-4 md:py-6 border-b border-white/5 shrink-0">
-            <div className="flex items-center gap-3 mb-1 min-w-0">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shrink-0" />
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white truncate">Clinical Socratic AI</h3>
-            </div>
-            <p className="text-[10px] text-slate-500 leading-relaxed truncate">Systematically analyze findings via ABCDE approach.</p>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar bg-[#04070a]">
-            {messages.filter(m => m.role !== 'system').map((msg, idx) => (
-              <div key={idx} className="space-y-4">
-                <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                  {msg.role === 'assistant' && (
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">Attending Radiologist</span>
-                  )}
-                  <div className={`max-w-[90%] p-3 md:p-4 rounded-2xl text-[11px] md:text-xs leading-relaxed ${
-                    msg.role === 'user' 
-                      ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-500/10' 
-                      : 'bg-[#111] text-slate-300 rounded-tl-none border border-white/5'
-                  }`}>
-                    {msg.content}
-                  </div>
-                </div>
-                
-                {idx === 0 && msg.role === 'assistant' && (
-                  <div className="grid grid-cols-2 gap-2 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
-                    {[
-                      'Check lung fields',
-                      'Review cardiac size',
-                      'Examine hila',
-                      'Look at bones'
-                    ].map((chip) => (
-                      <button 
-                        key={chip}
-                        onClick={() => useChip(chip)}
-                        className="p-2.5 bg-[#111] border border-white/5 hover:border-blue-500/30 rounded-xl text-left text-[10px] text-slate-400 hover:text-white transition-all uppercase font-black tracking-tight"
-                      >
-                        {chip}
-                      </button>
-                    ))}
+        {/* Mobile Chat Peek / Bottom Drawer */}
+        <AnimatePresence>
+          {isMobile && (
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: isChatExpanded ? 0 : 'calc(100% - 64px)' }}
+              className="fixed inset-x-0 bottom-0 z-[100] bg-[#080c14] md:hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)] border-t border-white/10 rounded-t-[2rem]"
+              style={{ height: isChatExpanded ? '90vh' : 'auto' }}
+            >
+              <div 
+                className="w-full py-3 flex flex-col items-center cursor-pointer"
+                onClick={() => setIsChatExpanded(!isChatExpanded)}
+              >
+                <div className="w-12 h-1.5 bg-white/10 rounded-full mb-2" />
+                {!isChatExpanded && (
+                  <div className="px-6 w-full flex items-center justify-between">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse flex-shrink-0" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 truncate">
+                        {messages[messages.length - 1].content}
+                      </span>
+                    </div>
+                    {isChatExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronUp className="w-4 h-4 text-slate-500" />}
                   </div>
                 )}
               </div>
-            ))}
-            {isTyping && (
-              <div className="flex flex-col items-start">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">Analyzing...</span>
-                <div className="bg-[#111] p-3 md:p-4 rounded-2xl rounded-tl-none border border-white/5 flex gap-1.5">
-                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" />
-                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]" />
-                </div>
-              </div>
-            )}
-            <div ref={chatEndRef} />
-          </div>
 
-          <div className="p-4 md:p-6 border-t border-white/5 bg-[#080c14] shrink-0">
-            <div className="relative group">
-              <textarea
-                ref={textAreaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                className="w-full bg-[#04070a] border border-white/5 rounded-2xl p-3 md:p-4 pr-12 md:pr-14 text-[11px] md:text-xs resize-none h-12 md:h-14 focus:border-blue-500/50 transition-all custom-scrollbar outline-none"
-                placeholder="Describe what you see..."
-              />
-              <button 
-                onClick={() => handleSend()}
-                disabled={!input.trim() || isTyping}
-                className="absolute bottom-3 md:bottom-4 right-3 md:right-4 p-2.5 md:p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all disabled:opacity-30 disabled:grayscale shadow-lg shadow-blue-500/20 active:scale-95"
-              >
-                <Send className="w-4 h-4" />
-              </button>
+              {isChatExpanded && (
+                <div className="flex flex-col h-full overflow-hidden">
+                   <div className="px-6 pb-4 border-b border-white/5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Clinical AI Tutor</h3>
+                          <p className="text-[9px] text-slate-500 font-mono">Systematic ABCDE Review</p>
+                        </div>
+                        <button onClick={() => setIsChatExpanded(false)} className="p-2 bg-white/5 rounded-lg">
+                          <ChevronDown className="w-4 h-4 text-slate-400" />
+                        </button>
+                      </div>
+                   </div>
+
+                   <div className="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar bg-[#04070a]">
+                      {messages.filter(m => m.role !== 'system').map((msg, idx) => (
+                        <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                          <div className={`max-w-[85%] p-4 rounded-2xl text-[12px] leading-relaxed ${
+                            msg.role === 'user' ? 'bg-blue-600 text-white shadow-lg' : 'bg-[#111] text-slate-300 border border-white/5'
+                          }`}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+                      <div ref={chatEndRef} />
+                   </div>
+
+                   <div className="p-4 bg-[#080c14] border-t border-white/5 pb-10">
+                      <div className="relative">
+                        <textarea
+                          value={input}
+                          onChange={(e) => setInput(e.target.value)}
+                          className="w-full bg-[#04070a] border border-white/10 rounded-2xl p-4 pr-14 text-sm font-bold text-white resize-none h-14 outline-none"
+                          placeholder="Type findings..."
+                        />
+                        <button 
+                          onClick={() => handleSend()}
+                          className="absolute right-2 bottom-2 p-3 bg-blue-600 text-white rounded-xl shadow-lg"
+                        >
+                          <Send className="w-4 h-4" />
+                        </button>
+                      </div>
+                   </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Desktop Chat Panel */}
+        {!isMobile && (
+          <aside className="w-[400px] flex flex-col bg-[#05080c] lg:bg-[#080c14] shrink-0 border-l border-white/5 overflow-hidden shadow-[-20px_0_50px_rgba(0,0,0,0.5)]">
+            <div className="px-6 py-4 md:py-6 border-b border-white/5 shrink-0">
+              <div className="flex items-center gap-3 mb-1 min-w-0">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shrink-0" />
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white truncate">Clinical Socratic AI</h3>
+              </div>
+              <p className="text-[10px] text-slate-500 font-medium leading-relaxed truncate">Systematically analyze findings via ABCDE approach.</p>
             </div>
-          </div>
-        </aside>
+
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar bg-[#04070a]">
+              {messages.filter(m => m.role !== 'system').map((msg, idx) => (
+                <div key={idx} className="space-y-4">
+                  <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                    {msg.role === 'assistant' && (
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">Attending Radiologist</span>
+                    )}
+                    <div className={`max-w-[90%] p-3 md:p-4 rounded-2xl text-[11px] md:text-xs leading-relaxed ${
+                      msg.role === 'user' 
+                        ? 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-500/10' 
+                        : 'bg-[#111] text-slate-300 rounded-tl-none border border-white/5'
+                    }`}>
+                      {msg.content}
+                    </div>
+                  </div>
+                  
+                  {idx === 0 && msg.role === 'assistant' && (
+                    <div className="grid grid-cols-2 gap-2 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                      {[
+                        'Check lung fields',
+                        'Review cardiac size',
+                        'Examine hila',
+                        'Look at bones'
+                      ].map((chip) => (
+                        <button 
+                          key={chip}
+                          onClick={() => useChip(chip)}
+                          className="p-2.5 bg-[#111] border border-white/5 hover:border-blue-500/30 rounded-xl text-left text-[10px] text-slate-400 hover:text-white transition-all uppercase font-black tracking-tight active:scale-95 touch-manipulation"
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {isTyping && (
+                <div className="flex flex-col items-start">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">Analyzing...</span>
+                  <div className="bg-[#111] p-3 md:p-4 rounded-2xl rounded-tl-none border border-white/5 flex gap-1.5">
+                    <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" />
+                    <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            <div className="p-4 md:p-6 border-t border-white/5 bg-[#080c14] shrink-0">
+              <div className="relative group">
+                <textarea
+                  ref={textAreaRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  className="w-full bg-[#04070a] border border-white/5 rounded-2xl p-3 md:p-4 pr-12 md:pr-14 text-[11px] md:text-xs resize-none h-12 md:h-14 focus:border-blue-500/50 transition-all custom-scrollbar outline-none"
+                  placeholder="Describe what you see..."
+                />
+                <button 
+                  onClick={() => handleSend()}
+                  disabled={!input.trim() || isTyping}
+                  className="absolute bottom-3 md:bottom-4 right-3 md:right-4 p-2.5 md:p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all disabled:opacity-30 disabled:grayscale shadow-lg shadow-blue-500/20 active:scale-95 touch-manipulation"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </aside>
         )}
       </div>
 

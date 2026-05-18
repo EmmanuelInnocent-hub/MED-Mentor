@@ -184,64 +184,111 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-x-auto custom-scrollbar p-2 md:p-4">
-            <table className="w-full min-w-[600px] border-separate border-spacing-y-2">
-              <thead>
-                <tr className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  <th className="px-6 py-3">Case Title</th>
-                  <th className="px-4 py-3">Specialty</th>
-                  <th className="px-4 py-3 text-center">Score</th>
-                  <th className="px-4 py-3 text-center">Status</th>
-                  <th className="px-6 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sessions.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-12 text-center text-slate-400 text-sm font-medium">No clinical simulations found.</td>
+      <div className="flex-1 overflow-visible">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto custom-scrollbar p-4">
+              <table className="w-full min-w-[600px] border-separate border-spacing-y-2">
+                <thead>
+                  <tr className="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <th className="px-6 py-3">Case Title</th>
+                    <th className="px-4 py-3">Specialty</th>
+                    <th className="px-4 py-3 text-center">Score</th>
+                    <th className="px-4 py-3 text-center">Status</th>
+                    <th className="px-6 py-3 text-right">Actions</th>
                   </tr>
-                ) : (
-                  sessions.map((session) => (
-                    <tr key={session.id} className="group hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{session.caseTitle}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">
-                          {isNaN(new Date(session.completedAt).getTime()) ? "recently" : new Date(session.completedAt).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-slate-500 font-medium tracking-tight">
-                        {session.specialty}
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <span className={`inline-block text-[10px] font-black px-3 py-1.5 rounded-lg border leading-none ${
-                          session.score.overall >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                          session.score.overall >= 60 ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
-                          'bg-rose-50 text-rose-700 border-rose-100'
-                        }`}>
-                          {session.score.overall}%
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <span className={`text-[9px] font-black uppercase tracking-widest ${
-                          session.score.overall >= 80 ? 'text-emerald-500' :
-                          session.score.overall >= 60 ? 'text-yellow-600' : 'text-rose-500'
-                        }`}>
-                          {session.score.overall >= 80 ? 'Passed' : session.score.overall >= 60 ? 'Review Needed' : 'Failed'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => navigate(`/results/${session.id}`)}
-                          className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:text-blue-800"
-                        >
-                          Review
-                        </button>
-                      </td>
+                </thead>
+                <tbody>
+                  {sessions.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-12 text-center text-slate-400 text-sm font-medium">No clinical simulations found.</td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    sessions.map((session) => (
+                      <tr key={session.id} className="group hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{session.caseTitle}</div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">
+                            {isNaN(new Date(session.completedAt).getTime()) ? "recently" : new Date(session.completedAt).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 text-sm text-slate-500 font-medium tracking-tight">
+                          {session.specialty}
+                        </td>
+                        <td className="px-4 py-4 text-center">
+                          <span className={`inline-block text-[10px] font-black px-3 py-1.5 rounded-lg border leading-none ${
+                            session.score.overall >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                            session.score.overall >= 60 ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                            'bg-rose-50 text-rose-700 border-rose-100'
+                          }`}>
+                            {session.score.overall}%
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-center">
+                          <span className={`text-[9px] font-black uppercase tracking-widest ${
+                            session.score.overall >= 80 ? 'text-emerald-500' :
+                            session.score.overall >= 60 ? 'text-yellow-600' : 'text-rose-500'
+                          }`}>
+                            {session.score.overall >= 80 ? 'Passed' : session.score.overall >= 60 ? 'Review Needed' : 'Failed'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button 
+                            onClick={() => navigate(`/results/${session.id}`)}
+                            className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:text-blue-800"
+                          >
+                            Review
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile List View */}
+            <div className="md:hidden p-4 space-y-4">
+              {sessions.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm font-medium border-2 border-dashed border-slate-100 rounded-3xl">
+                  No clinical simulations found.
+                </div>
+              ) : (
+                sessions.map((session) => (
+                  <div 
+                    key={session.id} 
+                    onClick={() => navigate(`/results/${session.id}`)}
+                    className="p-5 bg-white border border-slate-100 rounded-3xl shadow-sm active:scale-[0.98] transition-all flex flex-col gap-4"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="max-w-[70%]">
+                        <div className="font-bold text-slate-900 leading-tight mb-1">{session.caseTitle}</div>
+                        <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">{session.specialty}</div>
+                      </div>
+                      <div className={`text-sm font-black px-3 py-1.5 rounded-xl border leading-none ${
+                        session.score.overall >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                        session.score.overall >= 60 ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                        'bg-rose-50 text-rose-700 border-rose-100'
+                      }`}>
+                        {session.score.overall}%
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between border-t border-slate-50 pt-4">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3 h-3 text-slate-300" />
+                        <span className="text-[10px] font-bold text-slate-400">
+                           {isNaN(new Date(session.completedAt).getTime()) ? "recently" : new Date(session.completedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[9px] font-black uppercase tracking-[0.1em] text-blue-600">Review Result</span>
+                        <ChevronRight className="w-3 h-3 text-blue-600" />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </section>
 

@@ -202,61 +202,61 @@ export default function Profile() {
             </button>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 md:gap-8 relative z-10">
-            <div className="flex flex-col sm:flex-row items-center gap-5 md:gap-6 text-center sm:text-left">
-              <div className="relative">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-white/5 p-1 bg-white/5">
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-2xl sm:text-3xl md:text-4xl font-display font-black text-white relative shadow-2xl">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
+            <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left transition-all">
+              <div className="relative shrink-0">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white/5 p-1 bg-white/5 shadow-2xl">
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-3xl md:text-4xl font-display font-black text-white relative">
                     {(profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel').slice(0, 2).toUpperCase()}
-                    <div className="absolute bottom-0 right-0 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-emerald-500 border-2 border-slate-900 rounded-full flex items-center justify-center shadow-lg">
-                      <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white" />
+                    <div className="absolute bottom-1 right-1 w-6 h-6 md:w-8 md:h-8 bg-emerald-500 border-2 border-slate-900 rounded-full flex items-center justify-center shadow-lg">
+                      <Check className="w-3 md:w-4 text-white" />
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="space-y-0.5 md:space-y-1">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white leading-tight">
+              <div className="space-y-1">
+                <h2 className="text-2xl md:text-3xl font-display font-black text-white leading-tight">
                   Dr. {profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel'}
                 </h2>
-                <div className="flex flex-wrap justify-center sm:justify-start items-center gap-x-3 gap-y-1">
-                  <p className="text-[10px] md:text-xs text-slate-400 font-mono tracking-[0.15em] uppercase">
+                <div className="flex flex-wrap justify-center md:justify-start items-center gap-x-3 gap-y-1">
+                  <p className="text-[10px] md:text-xs text-slate-400 font-mono tracking-[0.15em] uppercase font-black">
                     {profile?.rank || 'Resident'}
                   </p>
-                  <span className="hidden sm:inline text-slate-700 font-bold">•</span>
-                  <p className="text-[10px] md:text-xs text-slate-500 font-mono tracking-[0.15em] uppercase">
+                  <span className="hidden md:inline text-slate-700 font-bold">•</span>
+                  <p className="text-[10px] md:text-xs text-slate-500 font-mono tracking-[0.15em] uppercase font-black">
                     {profile?.institution || 'Global Clinic'}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col items-center lg:items-end justify-center gap-4">
+            <div className="flex flex-col items-center lg:items-end justify-center w-full lg:w-auto">
               <button 
                 onClick={() => setIsModalOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20 active:scale-95 w-full sm:w-auto"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 md:py-3 rounded-2xl md:rounded-2xl font-black text-[11px] md:text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-500/20 active:scale-95 w-full sm:w-80 lg:w-auto touch-manipulation"
               >
                 Modify Registry
               </button>
             </div>
           </div>
 
-          <div className="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 bg-white/5 rounded-2xl md:rounded-[2rem] overflow-hidden backdrop-blur-md border border-white/10 shadow-inner relative z-10">
-            <div className="p-4 sm:p-6 md:p-8 flex flex-col items-center border-r border-b md:border-b-0 border-white/5">
-              <span className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white">{stats.casesDone}</span>
-              <span className="text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase font-black tracking-widest text-slate-500 mt-0.5 sm:mt-1">Cases Done</span>
+          <div className="mt-10 md:mt-12 grid grid-cols-2 md:grid-cols-4 bg-white/5 rounded-[2rem] overflow-hidden backdrop-blur-md border border-white/10 shadow-inner relative z-10">
+            <div className="p-6 md:p-8 flex flex-col items-center border-r border-b md:border-b-0 border-white/5 bg-white/[0.02]">
+              <span className="text-2xl md:text-3xl font-display font-black text-white">{stats.casesDone}</span>
+              <span className="text-[9px] md:text-[10px] font-mono uppercase font-black tracking-widest text-slate-500 mt-1">Cases Done</span>
             </div>
-            <div className="p-4 sm:p-6 md:p-8 flex flex-col items-center border-b md:border-r md:border-b-0 border-white/5">
-              <span className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white">{stats.avgScore}%</span>
-              <span className="text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase font-black tracking-widest text-slate-500 mt-0.5 sm:mt-1">Avg Score</span>
+            <div className="p-6 md:p-8 flex flex-col items-center border-b md:border-r md:border-b-0 border-white/5 bg-white/[0.04]">
+              <span className="text-2xl md:text-3xl font-display font-black text-white">{stats.avgScore}%</span>
+              <span className="text-[9px] md:text-[10px] font-mono uppercase font-black tracking-widest text-slate-500 mt-1">Avg Score</span>
             </div>
-            <div className="p-4 sm:p-6 md:p-8 flex flex-col items-center border-r border-white/5">
-              <span className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white">{stats.streak}</span>
-              <span className="text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase font-black tracking-widest text-slate-500 mt-0.5 sm:mt-1">Streak</span>
+            <div className="p-6 md:p-8 flex flex-col items-center border-r border-white/5 bg-white/[0.02]">
+              <span className="text-2xl md:text-3xl font-display font-black text-white">{stats.streak}</span>
+              <span className="text-[9px] md:text-[10px] font-mono uppercase font-black tracking-widest text-slate-500 mt-1">Streak</span>
             </div>
-            <div className="p-4 sm:p-6 md:p-8 flex flex-col items-center">
-              <span className="text-xl sm:text-2xl md:text-3xl font-display font-black text-white">#{stats.rank}</span>
-              <span className="text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase font-black tracking-widest text-slate-500 mt-0.5 sm:mt-1">Rank</span>
+            <div className="p-6 md:p-8 flex flex-col items-center bg-white/[0.04]">
+              <span className="text-2xl md:text-3xl font-display font-black text-white">#{stats.rank}</span>
+              <span className="text-[9px] md:text-[10px] font-mono uppercase font-black tracking-widest text-slate-500 mt-1">Rank</span>
             </div>
           </div>
         </div>
@@ -359,146 +359,158 @@ export default function Profile() {
             />
             
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 100 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90dvh]"
+              exit={{ opacity: 0, scale: 0.95, y: 100 }}
+              className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] md:rounded-[2rem] shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[95vh] md:h-auto max-h-[95vh] md:max-h-[90dvh] self-end md:self-center"
             >
+              {/* Modal Drag Handle (Mobile) */}
+              <div className="md:hidden w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-4 shrink-0" />
+              
               {/* Modal Header */}
-              <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="px-8 py-6 md:py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
                 <h3 className="text-lg font-display font-black text-slate-900">Modify Registry</h3>
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-900 transition-colors"
+                  className="p-3 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-900 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Modal Body */}
-              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
                 {/* Avatar Section */}
-                <div className="flex items-center gap-6">
+                <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
                   <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-2xl font-display font-black text-white shrink-0 shadow-xl">
                     {getInitials()}
                   </div>
                   <div>
-                    <button className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-2 mb-1">
-                      <Upload className="w-3 h-3" />
+                    <button className="text-xs font-black uppercase tracking-[0.2em] text-blue-600 hover:text-blue-700 transition-colors flex items-center justify-center sm:justify-start gap-2 mb-2 w-full sm:w-auto">
+                      <Upload className="w-3.5 h-3.5" />
                       Upload Photo
                     </button>
-                    <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">JPG, PNG, GIF · MAX 2MB</p>
+                    <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold">JPG, PNG, GIF · MAX 2MB</p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-slate-400 pb-2 border-b border-slate-50 flex items-center gap-2">
-                    <User className="w-3 h-3" />
+                <div className="space-y-6">
+                  <h4 className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-slate-400 pb-3 border-b border-slate-50 flex items-center gap-2">
+                    <User className="w-3.5 h-3.5" />
                     Personal Identity
                   </h4>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">First Name</label>
                       <input 
                         type="text" 
                         value={formData.firstName}
                         onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all"
                       />
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Last Name</label>
                       <input 
                         type="text" 
                         value={formData.lastName}
                         onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Title / Prefix</label>
-                    <select 
-                      value={formData.title}
-                      onChange={(e) => setFormData({...formData, title: e.target.value})}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
-                    >
-                      <option value="Dr.">Dr.</option>
-                      <option value="Prof.">Prof.</option>
-                      <option value="Mr.">Mr.</option>
-                      <option value="Ms.">Ms.</option>
-                      <option value="">None</option>
-                    </select>
+                    <div className="relative overflow-hidden group">
+                      <select 
+                        value={formData.title}
+                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all appearance-none"
+                      >
+                        <option value="Dr.">Dr.</option>
+                        <option value="Prof.">Prof.</option>
+                        <option value="Mr.">Mr.</option>
+                        <option value="Ms.">Ms.</option>
+                        <option value="">None</option>
+                      </select>
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-mono text-[10px] font-black">▼</div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-slate-400 pb-2 border-b border-slate-50 flex items-center gap-2">
-                    <Building className="w-3 h-3" />
+                <div className="space-y-6">
+                  <h4 className="text-[10px] font-mono font-black uppercase tracking-[0.3em] text-slate-400 pb-3 border-b border-slate-50 flex items-center gap-2">
+                    <Building className="w-3.5 h-3.5" />
                     Institutional Registry
                   </h4>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Current Role</label>
-                    <select 
-                      value={formData.role}
-                      onChange={(e) => setFormData({...formData, role: e.target.value})}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
-                    >
-                      <option value="RESIDENT">Resident</option>
-                      <option value="INTERN">Intern</option>
-                      <option value="FELLOW">Fellow</option>
-                      <option value="ATTENDING">Attending</option>
-                      <option value="STUDENT">Medical Student</option>
-                      <option value="CONSULTANT">Consultant</option>
-                    </select>
+                    <div className="relative overflow-hidden group">
+                      <select 
+                        value={formData.role}
+                        onChange={(e) => setFormData({...formData, role: e.target.value})}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all appearance-none"
+                      >
+                        <option value="RESIDENT">Resident</option>
+                        <option value="INTERN">Intern</option>
+                        <option value="FELLOW">Fellow</option>
+                        <option value="ATTENDING">Attending</option>
+                        <option value="STUDENT">Medical Student</option>
+                        <option value="CONSULTANT">Consultant</option>
+                      </select>
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-mono text-[10px] font-black">▼</div>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Institution</label>
-                    <div className="relative">
-                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <div className="relative grid">
+                      <Globe className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input 
                         type="text" 
                         value={formData.institution}
                         onChange={(e) => setFormData({...formData, institution: e.target.value})}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all"
                         placeholder="e.g. Lagos University Teaching Hospital"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Specialization</label>
-                    <div className="relative">
-                      <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <select 
-                        value={formData.specialization}
-                        onChange={(e) => setFormData({...formData, specialization: e.target.value})}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none"
-                      >
-                        <option value="">Not specified</option>
-                        <option value="General Medicine">General Medicine</option>
-                        <option value="Cardiology">Cardiology</option>
-                        <option value="Neurology">Neurology</option>
-                        <option value="Radiology">Radiology</option>
-                        <option value="Paediatrics">Paediatrics</option>
-                        <option value="Surgery">Surgery</option>
-                        <option value="Emergency Medicine">Emergency Medicine</option>
-                        <option value="Pathology">Pathology</option>
-                        <option value="Pharmacology">Pharmacology</option>
-                      </select>
+                    <div className="relative grid">
+                      <Briefcase className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 shrink-0 z-10" />
+                      <div className="relative">
+                        <select 
+                          value={formData.specialization}
+                          onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+                          className="w-full pl-12 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all appearance-none"
+                        >
+                          <option value="">Not specified</option>
+                          <option value="General Medicine">General Medicine</option>
+                          <option value="Cardiology">Cardiology</option>
+                          <option value="Neurology">Neurology</option>
+                          <option value="Radiology">Radiology</option>
+                          <option value="Paediatrics">Paediatrics</option>
+                          <option value="Surgery">Surgery</option>
+                          <option value="Emergency Medicine">Emergency Medicine</option>
+                          <option value="Pathology">Pathology</option>
+                          <option value="Pharmacology">Pharmacology</option>
+                        </select>
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 font-mono text-[10px] font-black">▼</div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <label className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 px-1">Clinical Bio</label>
                     <textarea 
                       value={formData.bio}
                       onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all h-24 resize-none"
+                      className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-base sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all h-32 md:h-24 resize-none shadow-inner"
                       placeholder="e.g. Final-year resident focused on emergency radiology..."
                     />
                   </div>
@@ -506,24 +518,24 @@ export default function Profile() {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-8 border-t border-slate-100 flex items-center justify-between gap-4 shrink-0">
-                <button 
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all"
-                >
-                  Cancel
-                </button>
+              <div className="p-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 bg-slate-50/30">
                 <button 
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20 flex items-center gap-2"
+                  className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-10 py-4 md:py-3 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 order-1 md:order-2 touch-manipulation"
                 >
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <Save className="w-4 h-4" />
+                    <Save className="w-4.5 h-4.5" />
                   )}
                   Save Registry
+                </button>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="w-full md:w-auto px-6 py-4 md:py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all order-2 md:order-1"
+                >
+                  Cancel Changes
                 </button>
               </div>
             </motion.div>

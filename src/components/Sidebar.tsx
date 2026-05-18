@@ -336,38 +336,31 @@ export default function Sidebar() {
 
 
       {/* Mobile Navigation Bar */}
-      {!location.pathname.startsWith('/case/') && !['/radiology', '/neurology', '/pathology', '/pharmacology', '/anatomy', '/pediatrics', '/tools/drug-checker', '/tools/progress', '/tools/leaderboard'].includes(location.pathname) && (
-        <div className="md:hidden fixed bottom-6 left-6 right-6 z-[100]">
-          <nav className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-4 flex justify-around items-center shadow-2xl shadow-blue-900/20">
-            {navSections[0].items.filter(item => item.path !== '/profile').map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex flex-col items-center gap-1.5 transition-all px-4 py-2 rounded-2xl ${
-                    isActive 
-                      ? 'text-blue-400 bg-blue-500/10' 
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`
-                }
-              >
-                <item.icon className="w-6 h-6" />
-                {location.pathname === item.path && (
-                  <motion.div layoutId="mobile-nav-pill" className="w-1 h-1 bg-blue-400 rounded-full shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
-                )}
-              </NavLink>
-            ))}
-            <NavLink 
-              to="/profile"
-              className={`w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-black text-[10px] shadow-lg border-2 ${
-                location.pathname === '/profile' ? 'border-blue-400' : 'border-white/10'
-              }`}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[200] bg-white/80 backdrop-blur-xl border-t border-slate-200 h-14 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+        <nav className="h-full flex justify-around items-center px-2">
+          {[
+            { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+            { icon: ScanSearch, label: 'Radiology', path: '/radiology' },
+            { icon: PlusCircle, label: 'Simulate', path: '/case/setup' },
+            { icon: User, label: 'Profile', path: '/profile' },
+          ].map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center gap-0.5 flex-1 transition-all h-full ${
+                  isActive 
+                    ? 'text-blue-600' 
+                    : 'text-slate-400'
+                }`
+              }
             >
-              {(profile?.firstName || user?.displayName?.split(' ')[0] || 'Emmanuel').slice(0, 2).toUpperCase()}
+              <item.icon className="w-5 h-5" />
+              <span className="text-[9px] font-black uppercase tracking-tight">{item.label}</span>
             </NavLink>
-          </nav>
-        </div>
-      )}
+          ))}
+        </nav>
+      </div>
     </>
   );
 }

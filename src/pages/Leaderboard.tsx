@@ -342,96 +342,157 @@ export default function Leaderboard() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Table */}
+              {/* Table / Card List */}
             <motion.div
               layout
-              className="bg-[#111620] border border-[#243044] rounded-[2rem] overflow-hidden shadow-2xl"
+              className="md:bg-[#111620] md:border md:border-[#243044] md:rounded-[2rem] overflow-hidden md:shadow-2xl"
             >
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#161d2a] border-b border-[#243044]">
-                    <th className="p-6 text-center font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
-                      Rank
-                    </th>
-                    <th className="p-6 font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
-                      Student Practitioner
-                    </th>
-                    <th className="p-6 text-center font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
-                      Mastery
-                    </th>
-                    <th className="p-6 text-center font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
-                      Cases
-                    </th>
-                    <th className="p-6 text-center font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
-                      Streak
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  <AnimatePresence mode="popLayout">
-                    {filteredRanks.map((row) => (
-                      <motion.tr
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        key={`${filter}-${row.rank}-${row.user}`}
-                        className={`group hover:bg-white/5 transition-colors ${row.isYou ? "bg-blue-600/5" : ""}`}
-                      >
-                        <td
-                          className={`p-6 text-center font-serif text-3xl ${
-                            row.rank === 1
-                              ? "text-amber-500"
-                              : row.rank === 2
-                                ? "text-slate-400"
-                                : row.rank === 3
-                                  ? "text-amber-900"
-                                  : "text-[#5a7090]"
-                          }`}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-[#161d2a] border-b border-[#243044]">
+                      <th className="p-6 text-center font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
+                        Rank
+                      </th>
+                      <th className="p-6 font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
+                        Student Practitioner
+                      </th>
+                      <th className="p-6 text-center font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
+                        Mastery
+                      </th>
+                      <th className="p-6 text-center font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
+                        Cases
+                      </th>
+                      <th className="p-6 text-center font-mono text-[#5a7090] text-[10px] uppercase tracking-widest">
+                        Streak
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    <AnimatePresence mode="popLayout">
+                      {filteredRanks.map((row) => (
+                        <motion.tr
+                          layout
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          key={`${filter}-${row.rank}-${row.user}`}
+                          className={`group hover:bg-white/5 transition-colors ${row.isYou ? "bg-blue-600/5" : ""}`}
                         >
-                          {row.rank}
-                        </td>
-                        <td className="p-6">
-                          <div className="flex items-center gap-4">
-                            <div
-                              className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xs font-serif transition-colors ${
-                                row.isYou
-                                  ? "bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_20px_rgba(37,99,235,0.2)]"
-                                  : "bg-[#1c2537] text-[#a8b8cc] border border-white/5 group-hover:border-white/10"
-                              }`}
-                            >
-                              {row.user.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
+                          <td
+                            className={`p-6 text-center font-serif text-3xl ${
+                              row.rank === 1
+                                ? "text-amber-500"
+                                : row.rank === 2
+                                  ? "text-slate-400"
+                                  : row.rank === 3
+                                    ? "text-amber-900"
+                                    : "text-[#5a7090]"
+                            }`}
+                          >
+                            {row.rank}
+                          </td>
+                          <td className="p-6">
+                            <div className="flex items-center gap-4">
                               <div
-                                className={`text-sm font-bold tracking-tight ${row.isYou ? "text-blue-400" : "text-white"}`}
+                                className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xs font-serif transition-colors ${
+                                  row.isYou
+                                    ? "bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_20px_rgba(37,99,235,0.2)]"
+                                    : "bg-[#1c2537] text-[#a8b8cc] border border-white/5 group-hover:border-white/10"
+                                }`}
                               >
-                                {row.user}
+                                {row.user.slice(0, 2).toUpperCase()}
                               </div>
-                              <div className="text-[10px] font-mono text-[#5a7090] uppercase">
-                                {row.school}
+                              <div>
+                                <div
+                                  className={`text-sm font-bold tracking-tight ${row.isYou ? "text-blue-400" : "text-white"}`}
+                                >
+                                  {row.user}
+                                </div>
+                                <div className="text-[10px] font-mono text-[#5a7090] uppercase">
+                                  {row.school}
+                                </div>
                               </div>
                             </div>
+                          </td>
+                          <td className="p-6 text-center">
+                            <span className="text-base font-mono font-bold text-green-500">
+                              {row.score}%
+                            </span>
+                          </td>
+                          <td className="p-6 text-center text-xs font-mono text-[#5a7090] font-bold tracking-tighter">
+                            {row.cases} CLI. CASES
+                          </td>
+                          <td className="p-6 text-center">
+                            <div className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/5 text-xs font-mono text-amber-500 font-bold border border-amber-500/10">
+                              <Flame className="w-3.5 h-3.5" /> {row.streak}
+                            </div>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card List */}
+              <div className="md:hidden space-y-4">
+                <AnimatePresence mode="popLayout">
+                  {filteredRanks.map((row) => (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      key={`mobile-${filter}-${row.rank}-${row.user}`}
+                      className={`p-5 rounded-[2rem] border transition-all ${
+                        row.isYou 
+                          ? "bg-blue-600/5 border-blue-600/20 shadow-[0_10px_30px_rgba(37,99,235,0.1)]" 
+                          : "bg-[#111620] border-white/5"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-4 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-serif text-lg ${
+                            row.rank === 1 ? "text-amber-500" : row.rank === 2 ? "text-slate-400" : row.rank === 3 ? "text-amber-900" : "text-[#5a7090]"
+                          }`}>
+                            {row.rank}
                           </div>
-                        </td>
-                        <td className="p-6 text-center">
-                          <span className="text-base font-mono font-bold text-green-500">
-                            {row.score}%
-                          </span>
-                        </td>
-                        <td className="p-6 text-center text-xs font-mono text-[#5a7090] font-bold tracking-tighter">
-                          {row.cases} CLI. CASES
-                        </td>
-                        <td className="p-6 text-center">
-                          <div className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/5 text-xs font-mono text-amber-500 font-bold border border-amber-500/10">
-                            <Flame className="w-3.5 h-3.5" /> {row.streak}
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-serif ${
+                            row.isYou ? "bg-blue-600/20 text-blue-400 border border-blue-500/30" : "bg-[#1c2537] text-white/40 border border-white/5"
+                          }`}>
+                            {row.user.slice(0, 2).toUpperCase()}
                           </div>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </AnimatePresence>
-                </tbody>
-              </table>
+                          <div>
+                            <div className={`text-sm font-black ${row.isYou ? "text-blue-400" : "text-white"}`}>
+                              {row.user}
+                              {row.isYou && <span className="ml-2 text-[8px] bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase tracking-widest">You</span>}
+                            </div>
+                            <div className="text-[10px] font-mono text-[#5a7090] uppercase truncate max-w-[120px]">
+                              {row.school}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-black text-green-500 font-mono tracking-tighter">{row.score}%</div>
+                          <div className="text-[8px] font-mono text-[#5a7090] uppercase tracking-widest">Mastery</div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                        <div className="flex items-center gap-2">
+                           <Activity className="w-3.5 h-3.5 text-[#5a7090]" />
+                           <span className="text-[10px] font-black font-mono text-[#5a7090] uppercase">{row.cases} Clinical Cases</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-500">
+                          <Flame className="w-3 h-3" />
+                          <span className="text-[10px] font-black font-mono">{row.streak}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
             </motion.div>
           </div>
         </section>
